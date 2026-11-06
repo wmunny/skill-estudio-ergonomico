@@ -85,6 +85,8 @@ Corrige el JSON con sus respuestas y pon en `contexto.confirmado` los campos que
     [--intervalo 1] [--fps-analisis 10] [--modelo full|heavy] [--sin-video]
 ```
 
+Si la carga solo se sostiene en algunas fases (p. ej. al levantar o volcar), usa `--tramos-carga`: un CSV `video;inicio_s;fin_s;kg` (video vacío = todos) que se aplica por instante en OWAS, REBA y RULA. Fuera de los tramos vale `--carga-kg` o la de la revisión; si no hay ninguna, la carga queda desconocida (rango). Cubre todo el vídeo con tramos (0 kg donde no carga) para no dejar huecos.
+
 Con varios vídeos, `--revision` va una vez por vídeo (en el mismo orden) o una para todos. Tarda aproximadamente lo que dura el vídeo; la pose queda en caché (`<carpeta>/cache`). Con revisión, el programa evalúa también sin ella y el informe compara los dos resultados.
 
 Devuelve un JSON corto: peor postura REBA y RULA por vídeo con su estado, nivel y validez, OWAS, avisos, datos desconocidos, **datos estimados por la IA sin confirmar** y la comparativa sin y con revisión.

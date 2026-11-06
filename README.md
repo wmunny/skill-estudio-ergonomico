@@ -21,7 +21,7 @@ En el vídeo sintético de paletizado del ejemplo (30 s, cuerpo entero a 45°), 
 | Entrada | Formato |
 | --- | --- |
 | Vídeos | MP4/MOV/AVI legibles por OpenCV. Varias tomas (se combinan) o varias cámaras sincronizadas (OWAS elige la mejor por instante y región) |
-| Carga | `--carga-kg 12`, o un CSV `video;inicio_s;fin_s;kg` por tramos; `--fuerza-brusca` |
+| Carga | `--carga-kg 12`, o un CSV `video;inicio_s;fin_s;kg` por tramos (se aplica por instante en OWAS, REBA y RULA; fuera de los tramos, `--carga-kg` o la de la revisión, y si no hay, rango); `--fuerza-brusca` |
 | Datos de REBA/RULA que la cámara no ve | `--agarre`, `--actividad`, `--muneca`, `--muneca-desviada`, `--muneca-giro-extremo`, `--hombro-elevado`, `--brazo-apoyado`, `--brazo-rotado`, `--cuello-girado`, `--cuello-inclinado`, `--fuerza-brusca`, `--apoyo-piernas`. Sin declarar → rango |
 | Turno | `--turno-h 8`, para expresar minutos por turno en OWAS |
 

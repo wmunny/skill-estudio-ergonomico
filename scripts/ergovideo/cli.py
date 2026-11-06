@@ -136,16 +136,24 @@ def evaluar(poses, nombres, desfases, args, metodos, modo, revs) -> dict:
         politicas.append(pol)
         fuentes.append(dict(nombre=nom, res=res, duracion=p.duracion, desfase=des))
     tramos = leer_tramos(args.tramos_carga)
-    carga_en = funcion_carga(args.carga_kg if args.carga_kg is not None else tarea.carga_kg, tramos)
+    carga_resto = args.carga_kg if args.carga_kg is not None else tarea.carga_kg
+    carga_en = funcion_carga(carga_resto, tramos)
     obs = muestreo.observar(fuentes, cfg, carga_en, modo)
     resumen = muestreo.resumir(obs, fuentes, cfg) if obs else None
     ergos = {}
     if "reba" in metodos or "rula" in metodos:
         for f, rev in zip(fuentes, revs):
-            fs = ergo.serie(f["res"], cfg, tarea, rev)
+            # Mismo criterio de tiempo que OWAS: en «mejor-camara» los tramos van en el tiempo común (t + desfase).
+            if not tramos:
+                c_en = None
+            elif modo == "mejor-camara":
+                c_en = lambda t, _v, d=f.get("desfase", 0.0): carga_en(t + d, None)  # noqa: E731
+            else:
+                c_en = carga_en
+            fs = ergo.serie(f["res"], cfg, tarea, rev, carga_en=c_en, video=f["nombre"])
             ergos[f["nombre"]] = _picos(fs, metodos, cfg, f["res"], (rev or {}).get("fases", []))
     return dict(cfg=cfg, tarea=tarea, postura=postura, origenes=origenes, fuentes=fuentes, politicas=politicas,
-                obs=obs, resumen=resumen, ergos=ergos, tramos=tramos)
+                obs=obs, resumen=resumen, ergos=ergos, tramos=tramos, carga_resto=carga_resto)
 
 
 def _cifras(ev: dict, metodos) -> dict:
@@ -323,8 +331,10 @@ def analizar(args) -> int:
                         + [("" if math.isnan(o["medidas"][k]) else f"{o['medidas'][k]:.3f}") for k in list(MEDIDAS) + ["velocidad"]])
 
     if tramos:
-        carga_texto = "por tramos (" + "; ".join(f"{t['video'] or 'todos'} {t['inicio']:g}–{t['fin']:g} s: {t['kg']:g} kg" for t in tramos) + \
-                      (f"), {args.carga_kg:g} kg el resto" if args.carga_kg is not None else "), no declarada el resto (rango)")
+        resto = ev["carga_resto"]
+        carga_texto = "por tramos, en OWAS, REBA y RULA (" + \
+                      "; ".join(f"{t['video'] or 'todos'} {t['inicio']:g}–{t['fin']:g} s: {t['kg']:g} kg" for t in tramos) + \
+                      (f"), {resto:g} kg el resto" if resto is not None else "), no declarada el resto (rango)")
     elif args.carga_kg is not None:
         carga_texto = f"{args.carga_kg:g} kg durante todo el vídeo (OWAS código {codigo_carga(args.carga_kg)})"
     else:
@@ -349,7 +359,8 @@ def analizar(args) -> int:
                  tarea=dict(vars(tarea), no_declarados=tarea.no_declarados()), origenes=ev["origenes"],
                  postura_base=ev["postura"], revision=revision_ctx, comparativa=comparativa,
                  parametros=dict(intervalo_s=args.intervalo, fps_analisis=args.fps_analisis, modelo=args.modelo, modo=modo,
-                                 desfases=desfases, carga_kg=args.carga_kg, tramos_carga=tramos, turno_h=args.turno_h,
+                                 desfases=desfases, carga_kg=args.carga_kg, tramos_carga=tramos,
+                                 carga_resto_kg=ev["carga_resto"], turno_h=args.turno_h,
                                  postura_base=args.postura_base, angulos=args.angulos, sin_margen=args.sin_margen,
                                  umbrales=vars(cfg.umbrales), filtros=vars(cfg.filtros)))
     (salida / "resumen.json").write_text(json.dumps(datos, ensure_ascii=False, indent=2, default=_json), encoding="utf-8")
@@ -409,7 +420,7 @@ def main(argv=None) -> int:
     b.add_argument("--salida", required=True)
     b.add_argument("--metodos", default="owas,reba,rula", help="Métodos, separados por comas: owas, reba, rula")
     b.add_argument("--carga-kg", type=float, default=None, help="Carga o fuerza (kg) durante todo el vídeo; sin declarar = rango")
-    b.add_argument("--tramos-carga", default=None, help="CSV video;inicio_s;fin_s;kg (OWAS por tramos)")
+    b.add_argument("--tramos-carga", default=None, help="CSV video;inicio_s;fin_s;kg (carga por tramos en OWAS, REBA y RULA)")
     b.add_argument("--fuerza-brusca", choices=["si", "no"], default=None, help="Cargas o fuerzas aplicadas bruscamente")
     b.add_argument("--agarre", choices=list(AGARRE), default=None, help="REBA: calidad del agarre")
     b.add_argument("--actividad", default=None, help="estatica, repetitiva, cambios (separadas por comas) o ninguna")

@@ -220,6 +220,37 @@ def test_validacion_con_brazo_tapado():
     assert not peor_postura(fs, "rula", "D").get("completo")
 
 
+def test_carga_por_tramos_en_reba_y_rula():
+    # La misma postura con carga solo en un tramo: la fuerza de RULA y la carga de REBA cambian por instante.
+    pose = pose_sintetica([{} for _ in range(60)], vista=40)
+    res = calcular(pose, CFG)
+    corte = float(res["t"][len(res["t"]) // 2])
+    rep = dict(estatica=False, repetitiva=True, cambios=False)
+
+    def carga_en(t, video):
+        return 3.0 if t < corte else 0.0
+    fs = serie(res, CFG, tarea(actividad=rep), carga_en=carga_en, video="v")
+    con = [f for f in fs if f["t"] < corte and f["reba"]]
+    sin = [f for f in fs if f["t"] >= corte and f["reba"]]
+    assert con and sin
+    assert all(f["rula"][s]["elementos"]["fuerza"] == [2] for f in con for s in "ID")  # 2–10 kg repetitiva
+    assert all(f["rula"][s]["elementos"]["fuerza"] == [0] for f in sin for s in "ID")  # < 2 kg
+    assert all(f["reba"]["elementos"]["carga"] == [0] for f in con + sin)              # < 5 kg en REBA
+
+    def con_seis(t, video):
+        return 6.0 if t < corte else 0.0
+    fs6 = serie(res, CFG, tarea(actividad=rep), carga_en=con_seis, video="v")
+    assert all(f["reba"]["elementos"]["carga"] == [1] for f in fs6 if f["t"] < corte and f["reba"])
+    a_con = [f["reba"]["A"][0] for f in fs6 if f["t"] < corte and f["reba"]]
+    a_sin = [f["reba"]["A"][0] for f in fs6 if f["t"] >= corte and f["reba"]]
+    assert min(a_con) == max(a_sin) + 1  # la puntuación A sube 1 solo en el tramo con carga
+
+    # Fuera de los tramos y sin carga general: desconocida, se recorre entera (rango), nunca la favorable.
+    fsn = serie(res, CFG, tarea(actividad=rep), carga_en=lambda t, v: 3.0 if t < corte else None, video="v")
+    assert all(f["rula"]["I"]["elementos"]["fuerza"] == [0, 2, 3] for f in fsn if f["t"] >= corte and f["reba"])
+    assert all(f["reba"]["elementos"]["carga"] == [0, 1, 2] for f in fsn if f["t"] >= corte and f["reba"])
+
+
 def test_rula_dos_lados_y_peor():
     from ergovideo.ergo import resumen_rula
     pose = pose_sintetica([dict(brazo_D=100, codo_D=30)] * 30, vista=30)

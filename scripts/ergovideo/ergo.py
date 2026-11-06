@@ -8,7 +8,7 @@ desconocido: se recorren todos sus valores posibles y la puntuación sale como r
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
 
 import numpy as np
@@ -215,9 +215,21 @@ def claves_rula(lado):
     return ["tronco_sag", "cuello", f"brazo_flex_{lado}", f"codo_{lado}"]
 
 
-def serie(res: dict, cfg: Config, tarea: Tarea, rev: dict | None = None) -> list[dict]:
-    """REBA y RULA (los dos lados) en cada fotograma analizado. `rev`: revisión visual (muñecas por fase)."""
+def serie(res: dict, cfg: Config, tarea: Tarea, rev: dict | None = None, carga_en=None,
+          video: str | None = None) -> list[dict]:
+    """REBA y RULA (los dos lados) en cada fotograma analizado. `rev`: revisión visual (muñecas por fase).
+    `carga_en(t, video)`: kg declarados en cada instante (tramos de carga, como en OWAS) o None si no se sabe;
+    sin ella se usa `tarea.carga_kg` en todo el vídeo."""
     from .revision import munecas_en
+    tareas: dict = {}
+
+    def tarea_en(t: float) -> Tarea:
+        if carga_en is None:
+            return tarea
+        kg = carga_en(t, video)
+        if kg not in tareas:
+            tareas[kg] = replace(tarea, carga_kg=kg)
+        return tareas[kg]
     out = []
     aproximado = res.get("aproximado", {})
     claves = list(res["series"])
@@ -233,9 +245,10 @@ def serie(res: dict, cfg: Config, tarea: Tarea, rev: dict | None = None) -> list
             out.append(dict(t=float(res["t"][i]), vista=vista, modo=modo, reba=None,
                             rula={"I": None, "D": None}, fiable={"reba": False, "I": False, "D": False}))
             continue
+        ti = tarea_en(float(res["t"][i]))
         out.append(dict(t=float(res["t"][i]), vista=vista, modo=modo,
-                        reba=reba(m, cfg, tarea, vista, modo),
-                        rula={s: rula(m, cfg, tarea, s, vista, modo) for s in "ID"},
+                        reba=reba(m, cfg, ti, vista, modo),
+                        rula={s: rula(m, cfg, ti, s, vista, modo) for s in "ID"},
                         fiable={"reba": fiable(CLAVES_REBA), "I": fiable(claves_rula("I")), "D": fiable(claves_rula("D"))}))
     return out
 
