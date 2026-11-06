@@ -233,7 +233,7 @@ def test_informe_sintetico(tmp_path):
                          postura_base="auto", angulos="auto"))
     md = informe.markdown(ctx)
     assert md.count("Demostración no validada") == 2
-    assert "Min/turno" in md and "20–40 min" in md and "Datos no declarados" in md
+    assert "Min/turno" in md and "20–40 min" in md and "Datos desconocidos" in md
     assert "Postura normal" in md and "Sin riesgo" not in md
     html = informe.a_html(md, tmp_path)
     assert "<table>" in html

@@ -42,56 +42,69 @@ Todos los comandos se ejecutan desde la carpeta de la skill. El vídeo de salida
 
 ## Flujo de trabajo
 
-### 1. Reunir los datos
-
-Pregunta lo que falte, de una vez y en lenguaje llano:
-
-- **Métodos**: OWAS, REBA, RULA o los tres (por defecto, los tres).
-- **Vídeos**: si hay varios, ¿son tomas distintas (combinar) o cámaras grabando a la vez (mejor-cámara, con desfases)?
-- **Carga** en kg (o por tramos con un CSV `video;inicio_s;fin_s;kg`) y si hay **fuerzas bruscas**.
-- **Agarre** (REBA): bueno, regular, malo o inaceptable.
-- **Actividad**: ¿alguna parte del cuerpo estática más de 1 min?, ¿movimientos repetidos más de 4 veces por minuto?, ¿cambios de postura bruscos o base inestable? (`--actividad estatica,repetitiva,cambios` o `ninguna`).
-- **Muñeca**: MediaPipe Pose la mide mal. Si el usuario la conoce, decláralo (`--muneca neutra|menos15|mas15`, `--muneca-desviada si|no`, `--muneca-giro-extremo si|no`); si no, la herramienta la estima y da rango.
-- **Lo que la cámara no ve**, cada uno con `si` o `no`: hombro elevado, brazo apoyado, brazo rotado (REBA), cuello rotado, cuello inclinado a un lado, fuerzas bruscas; y el **apoyo de las piernas** (`--apoyo-piernas bilateral|unilateral`).
-- Explica al usuario que **lo que no declare se recorre entero**: la puntuación saldrá como rango y puede quedar «incompleta». Pregunta, pero no inventes respuestas.
-- **Turno** (h) y si el puesto es **sentado** (`--postura-base sentado`).
-
-### 2. Inspeccionar (rápido, sin MediaPipe)
+### 1. Inspeccionar (rápido, sin MediaPipe)
 
 ```bash
 .venv\Scripts\python scripts\estudio_video.py inspeccionar --video <a.mp4> [--video <b.mp4>]
 ```
 
-### 3. Analizar
+### 2. Entender la tarea y revisar el esqueleto (obligatorio antes de puntuar)
+
+No puntúes sin saber qué hace la persona: si está sentada, no hay que pedir las piernas; si un brazo no se ve, hay que saberlo. Como en la PoC postura-poc (donde lo hacía Gemini Argon), **tú haces de revisor visual**:
+
+```bash
+.venv\Scripts\python scripts\estudio_video.py revisar --video <a.mp4> --salida <carpeta>
+```
+
+Genera láminas (`<carpeta>/revision/<vídeo>/revision_NN.jpg`) con cada instante dos veces, original y con el esqueleto (AZUL = lado izquierdo del trabajador, NARANJA = derecho), y una plantilla `revision_<vídeo>.json`. **Mira todas las láminas** y rellena la plantilla siguiendo [docs/REVISION_VISUAL.md](docs/REVISION_VISUAL.md): contexto (de pie o sentado, apoyo, carga, agarre, actividad, rotaciones), fases con su riesgo, muñecas por fase y lado, y veredictos sobre el esqueleto con evidencia.
+
+Tú informas; **la política la aplica el código** (lo mal colocado y las ocultaciones de más de 1,5 s se quitan; las cortas y lo «aproximado» se conservan con más margen; los lados solo se intercambian si la profundidad lo confirma). Lo aprendido en la PoC: la IA es buen auditor y mal filtro automático.
+
+### 3. Confirmar el contexto con el usuario
+
+Enséñale en lenguaje llano lo que has visto y pídele que confirme o corrija, de una vez:
+
+- **Postura y piernas**: de pie o sentado; apoyo de los pies; rodillas si no se ven.
+- **Carga** (kg) y si hay **fuerzas bruscas**; **agarre** (bueno, regular, malo, inaceptable).
+- **Actividad**: estática más de 1 min, repetitiva más de 4 veces por minuto, cambios bruscos o base inestable.
+- **Muñecas** por fase, **hombro elevado**, **brazo apoyado o rotado**, **cuello rotado o inclinado**.
+- **Métodos** (por defecto los tres), **turno** (h) y, si hay varios vídeos, si son tomas distintas (combinar) o cámaras simultáneas (mejor-cámara, con desfases).
+
+Corrige el JSON con sus respuestas y pon en `contexto.confirmado` los campos que confirme. Lo que diga el usuario en la línea de órdenes (`--carga-kg`, `--agarre`…) manda sobre la revisión. Lo que nadie sabe queda desconocido y se recorre entero (rango). No inventes respuestas.
+
+### 4. Analizar
 
 ```bash
 .venv\Scripts\python scripts\estudio_video.py analizar --video <a.mp4> [--video <b.mp4>] --salida <carpeta>
+    --revision <carpeta>\revision_<vídeo>.json
     [--metodos owas,reba,rula] [--carga-kg 12 | --tramos-carga t.csv] [--agarre regular]
     [--actividad repetitiva] [--muneca auto|neutra|menos15|mas15] [--muneca-desviada si|no] [--muneca-giro-extremo si|no]
     [--hombro-elevado si|no] [--brazo-apoyado si|no] [--brazo-rotado si|no] [--cuello-girado si|no]
-    [--cuello-inclinado si|no] [--fuerza-brusca si|no] [--apoyo-piernas bilateral|unilateral]
+    [--cuello-inclinado si|no] [--fuerza-brusca si|no] [--apoyo-piernas bilateral|unilateral] [--rodillas menos30|30a60|mas60]
     [--turno-h 8] [--modo combinar|mejor-camara] [--desfases 0,1.5] [--postura-base auto|de_pie|sentado]
     [--intervalo 1] [--fps-analisis 10] [--modelo full|heavy] [--sin-video]
 ```
 
-Tarda aproximadamente lo que dura el vídeo. La pose queda en caché (`<salida>/cache`): repetir con otros datos declarados es rápido. `--sin-video` para iterar.
+Con varios vídeos, `--revision` va una vez por vídeo (en el mismo orden) o una para todos. Tarda aproximadamente lo que dura el vídeo; la pose queda en caché (`<carpeta>/cache`). Con revisión, el programa evalúa también sin ella y el informe compara los dos resultados.
 
-Devuelve un JSON corto: categorías OWAS, % por código (`[%, ±margen, categoría]`), peor postura REBA y RULA por vídeo con su nivel y validez, avisos, consejos y datos no declarados.
+Devuelve un JSON corto: peor postura REBA y RULA por vídeo con su estado, nivel y validez, OWAS, avisos, datos desconocidos, **datos estimados por la IA sin confirmar** y la comparativa sin y con revisión.
 
-### 4. Revisar antes de concluir
+### 5. Revisar antes de concluir
 
 - **Mira las capturas** de la peor postura de REBA y RULA y las de categoría OWAS alta. Si el esqueleto no coincide con el cuerpo, esa postura no vale: dilo. MediaPipe inventa las articulaciones tapadas con valores plausibles.
 - Si la peor postura sale **de frente o de espaldas**, los ángulos vienen de la profundidad estimada: el informe lo marca en ámbar. Trátala como orientativa.
 - Si la puntuación es un **rango**, explica de qué depende (muñeca, torsión, cuello, un brazo) y qué dato lo cerraría.
 
-### 5. Presentar resultados
+### 6. Presentar resultados
 
 Enlaza `informe.html` y resume:
 
 - **Validez por método primero** (semáforo y motivo).
 - **REBA y RULA**: peor postura (o rango) y su **estado** (concluyente, acotada, incompleta), nivel de actuación, en qué momento, qué elementos la explican y la trazabilidad (medidas, márgenes y origen); el pico breve si lo supera; RULA de los dos lados.
 - **OWAS**: % nominal del tiempo **observable** con su intervalo aproximado y su rango, categorías por frecuencia (marca las inciertas) y distribución de categorías de las combinaciones.
-- **Datos no declarados** y supuestos aplicados.
+- **Origen de los datos de la tarea** (declarado, confirmado, estimado por la IA, desconocido) y supuestos aplicados.
+- **Qué ha cambiado la revisión visual** (tabla «sin revisión / con revisión») y qué veredictos se aplicaron.
+- Si una **fase de riesgo** no se ve (p. ej. el brazo que trabaja queda tapado), dilo como conclusión principal y propón la toma que falta.
 - **Recomendaciones de grabación**, sobre todo si algún método está en rojo.
 - Puedes proponer medidas preventivas generales a partir de los elementos que más puntúan, pero distingue lo que calcula la herramienta de tu interpretación.
 - Termina con el aviso: demostración no validada; no sustituye a una evaluación de riesgos.
@@ -118,9 +131,10 @@ Según Aghazadeh y Xiong (KAIST, preprint SSRN 6035502, sin revisión por pares)
 ## Archivos
 
 - `scripts/estudio_video.py`: punto de entrada.
-- `scripts/ergovideo/`: `pose.py` (MediaPipe), `medidas.py` (ángulos 2D/3D, lado visible), `filtros.py`, `reglas.py` (reglas deterministas por elemento sobre intervalos), `clasificar.py` (códigos OWAS), `ergo.py` (REBA, RULA y peor postura), `tablas.py` (tablas OWAS, REBA y RULA), `muestreo.py` (observaciones OWAS, cámaras, estadística), `grabacion.py` (diagnóstico y consejos), `visual.py`, `informe.py`.
+- `scripts/ergovideo/`: `pose.py` (MediaPipe), `medidas.py` (ángulos 2D/3D, lado visible), `filtros.py`, `reglas.py` (reglas deterministas por elemento sobre intervalos), `revision.py` (láminas, `revision.json` y política de decisión de la revisión visual), `clasificar.py` (códigos OWAS), `ergo.py` (REBA, RULA y peor postura), `tablas.py` (tablas OWAS, REBA y RULA), `muestreo.py` (observaciones OWAS, cámaras, estadística), `grabacion.py` (diagnóstico y consejos), `visual.py`, `informe.py`.
 - `scripts/ergovideo/sintetico.py`: esqueletos sintéticos para las pruebas.
-- `tests/`: `test_tablas.py` (904 celdas frente a `fixtures/tablas_ergonautas.json`), `test_fronteras.py` (cada umbral en a − ε, a y a + ε), `test_owas.py` y `test_reba_rula.py` (posturas sintéticas, desconocidos, márgenes, pruebas de aceptación de la auditoría).
+- `tests/`: `test_tablas.py` (904 celdas frente a `fixtures/tablas_ergonautas.json`), `test_fronteras.py` (cada umbral en a − ε, a y a + ε), `test_owas.py`, `test_reba_rula.py` (posturas sintéticas, desconocidos, márgenes, pruebas de aceptación de la auditoría) y `test_revision.py` (validación del JSON, política de decisión, origen de los datos).
+- `docs/REVISION_VISUAL.md`: instrucciones para la revisión visual (contexto, fases, muñecas, veredictos).
 - `scripts/informe_revision.py`: genera `docs/REVISION_METODOS.md` y `docs/revision_metodos.html` desde el código, para la revisión experta.
 - `estudios/` y `ejemplos/`: salidas locales (informes, capturas, vídeos). Están en `.gitignore` y nunca se suben al repositorio; guarda cada análisis en `estudios/<nombre-del-vídeo>/`.
 - `docs/LIMITACIONES.md`: qué no hace la herramienta y por qué no está validada.

@@ -30,7 +30,7 @@ CODIGOS = {"espalda": ESPALDA, "brazos": BRAZOS, "piernas": PIERNAS}
 NOTAS_REGION = {
     "espalda": {"giro_no_medido", "lateral_no_medida", "espalda_no_visible"},
     "brazos": {"un_brazo_no_visible", "brazos_no_visibles"},
-    "piernas": {"una_pierna_no_visible", "piernas_no_visibles", "sentado_declarado"},
+    "piernas": {"una_pierna_no_visible", "piernas_no_visibles", "sentado_declarado", "rodillas_supuestas", "apoyo_supuesto"},
 }
 
 
@@ -49,6 +49,7 @@ def factor_vista(region: str, vista: float) -> float:
 def _medidas_fotograma(res: dict, i: int) -> dict:
     m = {k: float(v[i]) for k, v in res["series"].items()}
     m["velocidad"] = float(res["velocidad"][i])
+    m["_aprox"] = frozenset(k for k, v in res.get("aproximado", {}).items() if v[i])
     return m
 
 

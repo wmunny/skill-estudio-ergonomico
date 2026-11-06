@@ -194,7 +194,23 @@ def _mediana_movil(v: np.ndarray, t: np.ndarray, semi_s: float) -> np.ndarray:
     return out
 
 
-def calcular(pose, cfg: Config) -> dict:
+# Puntos de los que depende cada medida (para marcar la medida como «aproximada» si lo es alguno).
+_L = {"I": dict(h=11, c=13, m=15, ca=23, r=25, t=27, mano=(17, 19)), "D": dict(h=12, c=14, m=16, ca=24, r=26, t=28, mano=(18, 20))}
+PUNTOS_MEDIDA = {
+    "tronco_flex": (11, 12, 23, 24), "tronco_sag": (11, 12, 23, 24), "tronco_lat": (11, 12, 23, 24),
+    "tronco_giro": (11, 12, 23, 24), "cuello": (7, 8, 11, 12), "tobillos": (27, 28),
+}
+for _s, _p in _L.items():
+    PUNTOS_MEDIDA.update({
+        f"brazo_alt_{_s}": (_p["h"], _p["c"], _p["m"]), f"brazo_flex_{_s}": (_p["h"], _p["c"]),
+        f"brazo_abd_{_s}": (_p["h"], _p["c"], 11, 12), f"codo_{_s}": (_p["h"], _p["c"], _p["m"]),
+        f"muneca_{_s}": (_p["c"], _p["m"]) + _p["mano"], f"antebrazo_lat_{_s}": (11, 12, _p["m"]),
+        f"rodilla_{_s}": (_p["ca"], _p["r"], _p["t"]), f"muslo_{_s}": (_p["ca"], _p["r"]), f"pierna_{_s}": (_p["r"], _p["t"]),
+    })
+
+
+def calcular(pose, cfg: Config, mascaras: dict | None = None) -> dict:
+    """mascaras (de revision.politica): «quitar» (N, 33) puntos que no se usan; «aprox» (N, 33) puntos aproximados."""
     """Series de medidas filtradas de un vídeo.
 
     Devuelve dict con: t, series (filtradas), crudas, razones (recuentos por medida), invalidos (N,33),
@@ -208,6 +224,9 @@ def calcular(pose, cfg: Config) -> dict:
     invalidos = puntos_invalidos(pose.lm, pose.wlm, pose.width, pose.height, f)
     usable = (vis >= f.visibilidad) & (invalidos == "") & det[:, None]
     usable_giro = (vis >= f.visibilidad_giro) & (invalidos == "") & det[:, None]
+    if mascaras is not None:
+        usable &= ~mascaras["quitar"]
+        usable_giro &= ~mascaras["quitar"]
     p2 = np.stack([pose.lm[:, :, 0] * pose.width, pose.lm[:, :, 1] * pose.height], axis=-1)
 
     # Escala del tronco en píxeles: mediana móvil (4 s) para que no la deforme una flexión momentánea.
@@ -263,6 +282,10 @@ def calcular(pose, cfg: Config) -> dict:
     # Valor interpolado (o sustituido por el filtro): hay dato en la serie pero no es el medido en ese fotograma.
     interpolado = {k: ~np.isnan(series[k]) & (np.isnan(crudas[k]) | (np.abs(series[k] - np.nan_to_num(crudas[k])) > 1e-9))
                    for k in MEDIDAS}
+    ap = mascaras["aprox"] if mascaras is not None else np.zeros((N, 33), bool)
+    aproximado = {k: ~np.isnan(series[k]) & ap[:, list(PUNTOS_MEDIDA.get(k, ()))].any(axis=1) if PUNTOS_MEDIDA.get(k)
+                  else np.zeros(N, bool) for k in MEDIDAS}
     return dict(t=t, series=series, crudas=crudas, razones=razones, invalidos=invalidos, usable=usable, interpolado=interpolado,
+                aproximado=aproximado, quitados=(mascaras["quitar"] if mascaras is not None else np.zeros((N, 33), bool)),
                 vista=vista, modo=modo, lado_tronco=lado, velocidad=vel, escala_px=escala,
                 visibilidad=vis, detectado=det)

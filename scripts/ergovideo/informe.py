@@ -21,7 +21,9 @@ NOTAS = {
     "lateral_no_medida": "inclinación lateral no medible (entra en el rango)",
     "un_brazo_no_visible": "un brazo no visible (entra en el rango)",
     "una_pierna_no_visible": "una pierna no visible (entra en el rango)",
-    "sentado_declarado": "sentado por indicación del usuario",
+    "sentado_declarado": "sentado (declarado o estimado en la revisión)",
+    "rodillas_supuestas": "rodillas no visibles: se usa la flexión declarada o estimada",
+    "apoyo_supuesto": "pies no visibles: se usa el apoyo declarado o estimado",
     "espalda_no_visible": "espalda no visible",
     "brazos_no_visibles": "brazos no visibles",
     "piernas_no_visibles": "piernas no visibles",
@@ -160,7 +162,11 @@ def markdown(ctx: dict) -> str:
     if tarea is not None and ("reba" in metodos or "rula" in metodos):
         faltan = tarea.no_declarados()
         if faltan:
-            w("**Datos no declarados (se recorren todos sus valores):** " + "; ".join(faltan) + ".")
+            w("**Datos desconocidos (se recorren todos sus valores):** " + "; ".join(faltan) + ".")
+            w("")
+        ia = [k for k, v in (ctx.get("origenes") or {}).items() if v == "estimado por IA"]
+        if ia:
+            w("**Datos estimados por la revisión visual sin confirmar:** " + ", ".join(ia).replace("_", " ") + ".")
             w("")
 
     # ---------------------------------------------------------------- datos
@@ -177,13 +183,16 @@ def markdown(ctx: dict) -> str:
     if a.get("turno_h"):
         w(f"- **Duración del turno:** {_f(a['turno_h'], 1)} h.")
     w(f"- **Varios vídeos:** {a['modo_texto']}.")
-    w(f"- **Postura de base:** {a['postura_base']}; **ángulos:** {a['angulos']} (auto: 2D de perfil, 3D en el resto).")
+    w(f"- **Ángulos:** {a['angulos']} (auto: 2D de perfil, 3D en el resto).")
     w("- **Margen de medida:** " + ("ninguno (comparación sin margen)." if ctx.get("sin_margen") else
       "provisional por zona: " + ", ".join(f"{k.replace('_', ' ')} ±{_f(v, 2 if v < 1 else 0)}" for k, v in MARGENES.items())
       + f"; ×{_f(FACTOR_FRONTAL, 1)} de frente o de espaldas."))
     w("- **Convenciones de frontera:** " + " ".join(f"{k}: {v}" for k, v in CONVENCIONES.items()) +
       f" Carga OWAS: {CONVENCION_CARGA_OWAS}.")
     w("")
+
+    _seccion_tarea(w, ctx)
+    _seccion_revision(w, ctx)
 
     # ---------------------------------------------------------------- REBA y RULA
     if "reba" in metodos or "rula" in metodos:
@@ -257,6 +266,130 @@ def markdown(ctx: dict) -> str:
     w(f"> {AVISO}")
     w("")
     return "\n".join(L)
+
+
+CAMPOS_TAREA = [
+    ("postura_base", "Postura de base"), ("carga_kg", "Carga o fuerza (kg)"), ("fuerza_brusca", "Fuerzas bruscas"),
+    ("agarre", "Agarre"), ("actividad_estatica", "Postura estática > 1 min"), ("actividad_repetitiva", "Repetitiva > 4/min"),
+    ("actividad_cambios", "Cambios bruscos o base inestable"), ("apoyo_piernas", "Apoyo de las piernas"),
+    ("rodillas", "Rodillas (si no se ven)"), ("hombro_elevado", "Hombro elevado"), ("brazo_apoyado", "Brazo apoyado"),
+    ("brazo_rotado", "Brazo rotado (REBA)"), ("cuello_girado", "Cuello rotado"), ("cuello_inclinado", "Cuello inclinado"),
+]
+AGARRES = {0: "bueno", 1: "regular", 2: "malo", 3: "inaceptable"}
+
+
+def _valor_tarea(campo, tarea, postura):
+    if campo == "postura_base":
+        return {"auto": "detectada en cada fotograma", "sentado": "sentado", "de_pie": "de pie"}.get(postura, postura)
+    if campo.startswith("actividad_"):
+        v = tarea.actividad.get(campo[10:])
+    elif campo == "agarre":
+        v = AGARRES.get(tarea.agarre) if tarea.agarre is not None else None
+    elif campo == "carga_kg":
+        v = None if tarea.carga_kg is None else _f(tarea.carga_kg, 1)
+    else:
+        v = getattr(tarea, campo)
+    return "—" if v is None else ("sí" if v is True else "no" if v is False else str(v))
+
+
+def _seccion_tarea(w, ctx: dict) -> None:
+    tarea, orig = ctx.get("tarea"), ctx.get("origenes") or {}
+    if tarea is None:
+        return
+    w("### Datos de la tarea y su origen")
+    w("")
+    w("«Declarado»: lo indicó el usuario. «IA, confirmado»: lo propuso la revisión visual y el usuario lo confirmó. "
+      "«Estimado por IA»: propuesto por la revisión visual sin confirmar (revísalo). «Desconocido»: se recorren todos "
+      "sus valores.")
+    w("")
+    w("| Dato | Valor | Origen |")
+    w("|---|---|---|")
+    for campo, etiqueta in CAMPOS_TAREA:
+        w(f"| {etiqueta} | {_valor_tarea(campo, tarea, ctx.get('postura_base', 'auto'))} | {orig.get(campo, 'desconocido')} |")
+    w("")
+    sin = [e for c, e in CAMPOS_TAREA if orig.get(c) == "estimado por IA"]
+    if sin:
+        w(f"> ⚠️ Datos estimados por la IA sin confirmar: {', '.join(sin)}. Las puntuaciones dependen de ellos.")
+        w("")
+
+
+def _seccion_revision(w, ctx: dict) -> None:
+    revs = ctx.get("revision") or []
+    if not revs:
+        return
+    w("## Revisión visual del esqueleto y de la tarea")
+    w("")
+    w("Claude ha revisado láminas con cada instante dos veces (original y con el esqueleto) y ha propuesto el contexto "
+      "de la tarea, sus fases, las muñecas y dónde el esqueleto no corresponde al cuerpo. **No decide qué se corrige:** "
+      "la política está en código (quitar lo mal colocado y las ocultaciones de más de 1,5 s; conservar como aproximadas "
+      "las ocultaciones cortas y lo «aproximado», con el margen de medida ampliado ×1,5; intercambiar lados solo si la "
+      "profundidad de MediaPipe lo confirma).")
+    w("")
+    for r in revs:
+        c = r["contexto"]
+        w(f"### {r['video']}")
+        w("")
+        if r.get("resumen"):
+            w(f"**Calidad del esqueleto:** {r['resumen']}")
+            w("")
+        if c.get("tarea"):
+            w(f"**Tarea:** {c['tarea']}")
+            w("")
+        extra = [x for x in (c.get("carga_evidencia"), c.get("observaciones")) if x]
+        if c.get("ciclos_observados"):
+            extra.append(f"ciclos observados: {c['ciclos_observados']}")
+        if extra:
+            w("**Observaciones de la revisión:** " + "; ".join(extra) + ".")
+            w("")
+        ergo_v = (ctx.get("ergo") or {}).get(r["video"], {})
+        if r["fases"]:
+            w("**Fases de la tarea** (cobertura = % de fotogramas con la parte evaluada visible; peor = rango de la peor postura de la fase):")
+            w("")
+            w("| Fase | Tramo | Riesgo (IA) | REBA cobertura · peor | RULA izq. cobertura · peor | RULA dch. cobertura · peor |")
+            w("|---|---|---|---|---|---|")
+            for i, f in enumerate(r["fases"]):
+                def celda(lista):
+                    if not lista or i >= len(lista):
+                        return "—"
+                    x = lista[i]
+                    return f"{_f(x['cobertura'])} % · {_r(x['peor']) if x['peor'] else '—'}"
+                w(f"| {f.get('descripcion', '')} | {_f(f['inicio'], 1)}–{_f(f['fin'], 1)} s | {f.get('riesgo')} | "
+                  f"{celda(ergo_v.get('reba_fases'))} | {celda((ergo_v.get('rula_fases') or {}).get('I'))} | "
+                  f"{celda((ergo_v.get('rula_fases') or {}).get('D'))} |")
+            w("")
+        if r["munecas"]:
+            w("**Muñecas estimadas por la IA** (solo se usan las de confianza alta o media, si no se han declarado):")
+            w("")
+            w("| Tramo | Lado | Flexión | Desviada | Girada | Confianza | Motivo |")
+            w("|---|---|---|---|---|---|---|")
+            sn = lambda v: "—" if v is None else ("sí" if v else "no")  # noqa: E731
+            for m in r["munecas"]:
+                w(f"| {_f(float(m['inicio']), 1)}–{_f(float(m['fin']), 1)} s | {m['lado']} | {m['flexion'].replace('_', ' ')} | "
+                  f"{sn(m.get('desviada'))} | {sn(m.get('girada'))} | {m['confianza']} | {m.get('motivo', '')} |")
+            w("")
+        if r["decisiones"]:
+            w("**Veredictos sobre el esqueleto y decisión aplicada:**")
+            w("")
+            w("| Articulación | Tramo | Veredicto (IA) | Decisión (código) | Evidencia |")
+            w("|---|---|---|---|---|")
+            for d in r["decisiones"]:
+                w(f"| {d['articulacion'].replace('_', ' ')} | {_f(d['inicio'], 1)}–{_f(d['fin'], 1)} s | "
+                  f"{d['veredicto'].replace('_', ' ')} | {d['accion']} | {d['evidencia']} |")
+            w("")
+        else:
+            w("La revisión no señala problemas en el esqueleto.")
+            w("")
+    comp = ctx.get("comparativa")
+    if comp:
+        w("### Efecto de la revisión")
+        w("")
+        w("| Resultado | Sin revisión | Con revisión |")
+        w("|---|---|---|")
+        for k, a, b in comp:
+            fa = f"{a[0]} {LUZ.get(a[1], '')}".strip()
+            fb = f"{b[0]} {LUZ.get(b[1], '')}".strip()
+            w(f"| {k} | {fa} | {fb} |")
+        w("")
 
 
 def _seccion_ergo(w, ctx: dict) -> None:

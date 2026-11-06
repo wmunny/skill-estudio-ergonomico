@@ -1,6 +1,16 @@
 # Roadmap
 
-Estado a 06/11/2026: skill funcional (OWAS, REBA y RULA), auditada documentalmente y con 1.254 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
+Estado a 06/11/2026: skill funcional (OWAS, REBA y RULA), auditada documentalmente, con revisión visual y 1.274 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
+
+## Hecho (06/11/2026): revisión visual y contexto de la tarea
+
+Lo aprendido en postura-poc con Gemini Argon, ahora con Claude como revisor: láminas original/esqueleto (`revisar`),
+`revision.json` con contexto, fases, muñecas por fase y veredictos con evidencia; política de decisión en código
+(ocultaciones largas y mal colocadas se quitan, cortas y aproximadas se conservan con más margen, lados solo con
+confirmación de la profundidad); el usuario confirma el contexto; el informe distingue el origen de cada dato y compara
+sin y con revisión. Sentado o de pie cierran las piernas que no se ven. Primera prueba: MTR-juguetes (REBA de 2–15 a
+4–7; OWAS de 0 % a 97 % de observaciones codificadas). Pendiente: consenso entre varias revisiones y validarlo con
+vídeos anotados.
 
 ## Próximo: varias tomas no simultáneas del mismo puesto (paso 1)
 

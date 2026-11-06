@@ -42,6 +42,7 @@ class Tarea:
     cuello_girado: bool | None = None
     cuello_inclinado: bool | None = None
     apoyo_piernas: str | None = None               # "bilateral" | "unilateral" | None
+    rodillas: str | None = None                    # si no se ven: "menos30" | "30a60" | "mas60" | None
 
     def no_declarados(self) -> list[str]:
         nombres = {
@@ -49,6 +50,7 @@ class Tarea:
             "muneca_desviada": "desviación o torsión de la muñeca", "muneca_giro_extremo": "pronación/supinación extrema (RULA)",
             "hombro_elevado": "hombro elevado", "brazo_apoyado": "brazo apoyado", "brazo_rotado": "brazo rotado (REBA)",
             "cuello_girado": "cuello rotado", "cuello_inclinado": "cuello inclinado lateralmente",
+            "apoyo_piernas": "apoyo de las piernas",
         }
         faltan = [v for k, v in nombres.items() if getattr(self, k) is None]
         faltan += [f"actividad {k}" for k in INDICADORES if self.actividad.get(k) is None]
@@ -97,18 +99,26 @@ def _r(s) -> tuple:
 
 # ------------------------------------------------------------------ un fotograma
 
+FACTOR_APROXIMADA = 1.5
+
+
 def _intervalos(m: dict, cfg: Config, vista, modo):
-    mg = (lambda k: 0.0) if cfg.muestreo.sin_margen else (lambda k: margen(k, vista, modo))  # noqa: E731
+    aprox = m.get("_aprox", frozenset())
+    mg = (lambda k: 0.0) if cfg.muestreo.sin_margen else \
+        (lambda k: margen(k, vista, modo) * (FACTOR_APROXIMADA if k in aprox else 1.0))  # noqa: E731
 
     def iv(k, minimo=None):
         return R.intervalo(m.get(k, nan), mg(k), minimo)
     return iv
 
 
-def _max_rodilla(iv):
+RODILLAS_DECLARADAS = {"menos30": (10.0, 10.0), "30a60": (45.0, 45.0), "mas60": (90.0, 90.0)}
+
+
+def _max_rodilla(iv, declaradas: str | None = None):
     a, b = iv("rodilla_I", 0.0), iv("rodilla_D", 0.0)
     if a is None or b is None:
-        return None
+        return RODILLAS_DECLARADAS.get(declaradas) if declaradas else None
     return (max(a[0], b[0]), max(a[1], b[1]))
 
 
@@ -126,7 +136,7 @@ def reba(m: dict, cfg: Config, tarea: Tarea, vista=None, modo="") -> dict:
     pos = piernas_posibles(m, cfg, cfg.postura_base, vista, modo)
     sentado = frozenset(p == 1 for p in pos)
     piernas = frozenset(a + k for a in R.apoyo_reba(pos, tarea.apoyo_piernas)
-                        for k in R.reba_rodillas(_max_rodilla(iv), sentado))
+                        for k in R.reba_rodillas(_max_rodilla(iv, tarea.rodillas), sentado))
     carga = R.reba_carga(tarea.carga_kg, tarea.fuerza_brusca)
     a = _reba_a(tronco, cuello, piernas, carga)
     lados = {}
@@ -134,7 +144,16 @@ def reba(m: dict, cfg: Config, tarea: Tarea, vista=None, modo="") -> dict:
         brazo = R.reba_brazo(iv(f"brazo_flex_{s}"), iv(f"brazo_abd_{s}", 0.0), tarea.brazo_rotado,
                              tarea.hombro_elevado, tarea.brazo_apoyado, u)
         ante = R.reba_antebrazo(iv(f"codo_{s}", 0.0))
-        mun = R.reba_muneca(iv(f"muneca_{s}", 0.0), tarea.muneca, tarea.muneca_desviada)
+        ia = m.get("_mun", {}).get(s)
+        if tarea.muneca or not ia:
+            mun = R.reba_muneca(iv(f"muneca_{s}", 0.0), tarea.muneca, tarea.muneca_desviada)
+        else:  # REBA: +1 si hay torsión o desviación
+            d = tarea.muneca_desviada
+            if d is None and ia.get("desviada") is not None and ia.get("girada") is not None:
+                d = bool(ia["desviada"] or ia["girada"])
+            elif d is None and (ia.get("desviada") or ia.get("girada")):
+                d = True
+            mun = R.reba_muneca(None, ia["flexion"], d)
         lados[s] = dict(brazo=sorted(brazo), antebrazo=sorted(ante), muneca=sorted(mun),
                         B=_r(_reba_b(brazo, ante, mun, R.reba_agarre(tarea.agarre))))
     b = frozenset(max(x, y) for x in _reba_b(*[frozenset(lados["I"][k]) for k in ("brazo", "antebrazo", "muneca")],
@@ -158,8 +177,14 @@ def rula(m: dict, cfg: Config, tarea: Tarea, lado: str, vista=None, modo="") -> 
     brazo = R.rula_brazo(iv(f"brazo_flex_{lado}"), iv(f"brazo_abd_{lado}", 0.0), tarea.hombro_elevado,
                          tarea.brazo_apoyado, u)
     ante = R.rula_antebrazo(iv(f"codo_{lado}", 0.0), iv(f"antebrazo_lat_{lado}"), u)
-    mun = R.rula_muneca(iv(f"muneca_{lado}", 0.0), tarea.muneca, tarea.muneca_desviada)
-    giro = R.rula_giro(tarea.muneca_giro_extremo)
+    ia = m.get("_mun", {}).get(lado)
+    if tarea.muneca or not ia:
+        mun = R.rula_muneca(iv(f"muneca_{lado}", 0.0), tarea.muneca, tarea.muneca_desviada)
+        giro = R.rula_giro(tarea.muneca_giro_extremo)
+    else:
+        d = tarea.muneca_desviada if tarea.muneca_desviada is not None else ia.get("desviada")
+        mun = R.rula_muneca(None, ia["flexion"], d)
+        giro = R.rula_giro(tarea.muneca_giro_extremo if tarea.muneca_giro_extremo is not None else ia.get("girada"))
     cuello = R.rula_cuello(iv("cuello"), tarea.cuello_girado, tarea.cuello_inclinado)
     tronco = R.rula_tronco(iv("tronco_sag"), iv("tronco_giro", 0.0), iv("tronco_lat", 0.0), u)
     piernas = R.apoyo_rula(piernas_posibles(m, cfg, cfg.postura_base, vista, modo), tarea.apoyo_piernas)
@@ -190,14 +215,18 @@ def claves_rula(lado):
     return ["tronco_sag", "cuello", f"brazo_flex_{lado}", f"codo_{lado}"]
 
 
-def serie(res: dict, cfg: Config, tarea: Tarea) -> list[dict]:
-    """REBA y RULA (los dos lados) en cada fotograma analizado."""
+def serie(res: dict, cfg: Config, tarea: Tarea, rev: dict | None = None) -> list[dict]:
+    """REBA y RULA (los dos lados) en cada fotograma analizado. `rev`: revisión visual (muñecas por fase)."""
+    from .revision import munecas_en
     out = []
+    aproximado = res.get("aproximado", {})
     claves = list(res["series"])
     interp = res.get("interpolado", {})
     for i in range(len(res["t"])):
         m = {k: float(res["series"][k][i]) for k in claves}
         m["velocidad"] = float(res["velocidad"][i])
+        m["_aprox"] = frozenset(k for k, v in aproximado.items() if v[i])
+        m["_mun"] = munecas_en(rev, float(res["t"][i]))
         vista, modo = float(res["vista"][i]), str(res["modo"][i])
         fiable = lambda ks: not any(bool(interp.get(k, np.zeros(1, bool))[i]) if k in interp else False for k in ks)  # noqa: E731
         if not res["detectado"][i]:
@@ -323,11 +352,30 @@ def peor_postura(fs: list[dict], metodo: str, lado: str | None = None, sostener_
     )
 
 
-def validar_pico(p: dict, metodo: str) -> dict:
+def cobertura_fases(fs: list[dict], metodo: str, lado: str | None, fases: list[dict]) -> list[dict]:
+    """Por fase de la tarea: % de fotogramas con la parte evaluada visible y la peor puntuación (mínimo del rango)."""
+    out = []
+    for f in fases:
+        a, b = float(f["inicio"]), float(f["fin"])
+        dentro = [x for x in fs if a - 1e-6 <= x["t"] <= b + 1e-6]
+        dets = [_obtener(x, metodo, lado) for x in dentro]
+        comp = [d for d in dets if d and d["completo"]]
+        out.append(dict(inicio=a, fin=b, descripcion=f.get("descripcion", ""), riesgo=f.get("riesgo"),
+                        cobertura=100 * len(comp) / len(dentro) if dentro else 0.0,
+                        peor=(max(d["rango"][0] for d in comp), max(d["rango"][1] for d in comp)) if comp else None))
+    return out
+
+
+def validar_pico(p: dict, metodo: str, fases_cob: list[dict] | None = None) -> dict:
     """Semáforo de un método de peor postura. Mide cobertura y certeza del resultado, no su exactitud."""
     if not p.get("evaluable"):
         return dict(nivel="rojo", motivos=["No hay ningún fotograma evaluable."])
     motivos, niveles = [], []
+    for f in fases_cob or []:
+        if f["cobertura"] < 50 and f["riesgo"] in ("alto", "medio"):
+            niveles.append("rojo" if f["riesgo"] == "alto" else "ambar")
+            motivos.append(f"La fase «{f['descripcion']}» ({f['inicio']:.1f}–{f['fin']:.1f} s, riesgo {f['riesgo']}) solo es "
+                           f"evaluable en el {f['cobertura']:.0f} % de sus fotogramas: su peor postura podría faltar.".replace(".", ",", 2))
     cob = p["completo"]
     niveles.append("verde" if cob >= 70 else "ambar" if cob >= 40 else "rojo")
     if niveles[-1] != "verde":

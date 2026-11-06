@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import ergo, grabacion, informe, medidas, muestreo, pose, visual
+from . import ergo, grabacion, informe, medidas, muestreo, pose, revision, visual
 from .config import MEDIDAS, Config
 from .reglas import CONVENCIONES
 from .tablas import CONVENCION_CARGA_OWAS, codigo_carga
@@ -71,7 +71,8 @@ def construir_tarea(args) -> ergo.Tarea:
         muneca_desviada=SI_NO[args.muneca_desviada], muneca_giro_extremo=SI_NO[args.muneca_giro_extremo],
         hombro_elevado=SI_NO[args.hombro_elevado], brazo_apoyado=SI_NO[args.brazo_apoyado],
         brazo_rotado=SI_NO[args.brazo_rotado], cuello_girado=SI_NO[args.cuello_girado],
-        cuello_inclinado=SI_NO[args.cuello_inclinado], apoyo_piernas=args.apoyo_piernas)
+        cuello_inclinado=SI_NO[args.cuello_inclinado], apoyo_piernas=args.apoyo_piernas,
+        rodillas=getattr(args, "rodillas", None))
 
 
 def inspeccionar(args) -> int:
@@ -93,12 +94,115 @@ def _rango(a, b) -> str:
     return f"{a}" if a == b else f"{a}–{b}"
 
 
-def analizar(args) -> int:
+def _picos(fs, metodos, cfg, res, fases):
+    d = dict(serie=fs)
+    if "reba" in metodos:
+        d["reba"] = ergo.peor_postura(fs, "reba")
+        d["reba_fases"] = ergo.cobertura_fases(fs, "reba", None, fases)
+        d["reba_val"] = ergo.validar_pico(d["reba"], "reba", d["reba_fases"])
+        if d["reba"].get("evaluable"):
+            d["reba"]["trazabilidad"] = ergo.trazabilidad(res, d["reba"]["indice_pico"], ergo.CLAVES_REBA + [
+                "brazo_abd_I", "brazo_abd_D", "muneca_I", "muneca_D", "tronco_giro", "tronco_lat"], cfg)
+    if "rula" in metodos:
+        d["rula"] = {s: ergo.peor_postura(fs, "rula", s) for s in "ID"}
+        d["rula_fases"] = {s: ergo.cobertura_fases(fs, "rula", s, fases) for s in "ID"}
+        d["rula_val"] = {s: ergo.validar_pico(d["rula"][s], "rula", d["rula_fases"][s]) for s in "ID"}
+        d["rula_lado"] = ergo.resumen_rula(d["rula"])
+        for s in "ID":
+            if d["rula"][s].get("evaluable"):
+                d["rula"][s]["trazabilidad"] = ergo.trazabilidad(res, d["rula"][s]["indice_pico"], ergo.claves_rula(s) + [
+                    f"brazo_abd_{s}", f"muneca_{s}", f"antebrazo_lat_{s}", "tronco_giro", "tronco_lat"], cfg)
+    return d
+
+
+def evaluar(poses, nombres, desfases, args, metodos, modo, revs) -> dict:
+    """Una evaluación completa. `revs`: revisión visual por vídeo (o None en todos: evaluación sin revisión)."""
     cfg = Config()
     cfg.muestreo.intervalo_s = args.intervalo
     cfg.muestreo.sin_margen = args.sin_margen
     cfg.modo_angulos = args.angulos
-    cfg.postura_base = args.postura_base
+    rev_global = next((r for r in revs if r), None)
+    tarea, postura, origenes = revision.completar_tarea(construir_tarea(args), rev_global, args.postura_base)
+    cfg.postura_base = postura
+    cfg.supuesto_piernas = dict(rodillas=tarea.rodillas, apoyo=tarea.apoyo_piernas)
+    fuentes, politicas = [], []
+    for p, nom, des, rev in zip(poses, nombres, desfases, revs):
+        if rev:
+            pol = revision.politica(rev, p)
+            p_uso = revision.aplicar_intercambio(p, pol["intercambiar"]) if pol["intercambiar"].any() else p
+            res = medidas.calcular(p_uso, cfg, pol)
+        else:
+            pol, res = None, medidas.calcular(p, cfg)
+        politicas.append(pol)
+        fuentes.append(dict(nombre=nom, res=res, duracion=p.duracion, desfase=des))
+    tramos = leer_tramos(args.tramos_carga)
+    carga_en = funcion_carga(args.carga_kg if args.carga_kg is not None else tarea.carga_kg, tramos)
+    obs = muestreo.observar(fuentes, cfg, carga_en, modo)
+    resumen = muestreo.resumir(obs, fuentes, cfg) if obs else None
+    ergos = {}
+    if "reba" in metodos or "rula" in metodos:
+        for f, rev in zip(fuentes, revs):
+            fs = ergo.serie(f["res"], cfg, tarea, rev)
+            ergos[f["nombre"]] = _picos(fs, metodos, cfg, f["res"], (rev or {}).get("fases", []))
+    return dict(cfg=cfg, tarea=tarea, postura=postura, origenes=origenes, fuentes=fuentes, politicas=politicas,
+                obs=obs, resumen=resumen, ergos=ergos, tramos=tramos)
+
+
+def _cifras(ev: dict, metodos) -> dict:
+    """Resumen comparable de una evaluación (para la tabla «sin revisión / con revisión»)."""
+    out = {}
+    for n, d in ev["ergos"].items():
+        if "reba" in d and d["reba"].get("evaluable"):
+            p = d["reba"]
+            out[f"REBA · {n}"] = (f"{_rango(p['pico'], p['pico_max'])} ({p['estado']})", d["reba_val"]["nivel"])
+        if "rula" in d:
+            for s in "ID":
+                p = d["rula"][s]
+                if p.get("evaluable"):
+                    out[f"RULA {'izq.' if s == 'I' else 'dch.'} · {n}"] = (f"{_rango(p['pico'], p['pico_max'])} ({p['estado']})",
+                                                                         d["rula_val"][s]["nivel"])
+    r = ev["resumen"]
+    if r and "owas" in metodos:
+        c = r["combinaciones"]
+        out["OWAS · combinaciones con código nominal"] = (f"{c['cobertura']:.0f} %".replace(".", ","), None)
+        out["OWAS · categoría máxima (nominal / posible)"] = (f"{c['categoria_max'] or '—'} / {c['categoria_max_posible'] or '—'}", None)
+        out["OWAS · piernas con código nominal"] = (f"{r['regiones']['piernas']['cobertura']:.0f} %", None)
+    return out
+
+
+def revisar(args) -> int:
+    """Láminas para la revisión visual y plantilla de revision.json, por vídeo."""
+    salida = Path(args.salida)
+    salida.mkdir(parents=True, exist_ok=True)
+    cfg = Config()
+    out = []
+    for v in args.video:
+        v = Path(v)
+        print(f"MediaPipe: {v.name}…", file=sys.stderr)
+        p = pose.estimar(v, args.fps_analisis, args.modelo, cache_dir=salida / "cache")
+        res = medidas.calcular(p, cfg)
+        # Instantes: cada `intervalo` s y, además, las posturas críticas de REBA y RULA sin datos declarados.
+        fs = ergo.serie(res, cfg, ergo.Tarea())
+        extra = []
+        for met, lados in (("reba", [None]), ("rula", ["I", "D"])):
+            for s in lados:
+                pk = ergo.peor_postura(fs, met, s)
+                extra += [c["t"] for c in pk.get("criticas", [])]
+        intervalo = args.intervalo or max(1.0, p.duracion / args.max_fotogramas)
+        inst = revision.instantes_revision(p.duracion, intervalo, extra, args.max_fotogramas)
+        dir_v = salida / "revision" / visual._seguro(v.name)
+        laminas = revision.hoja_revision(p, dir_v, inst, cfg.filtros.visibilidad)
+        plantilla = salida / f"revision_{visual._seguro(v.name)}.json"
+        if not plantilla.exists():
+            plantilla.write_text(json.dumps(revision.plantilla(str(v), p.duracion), ensure_ascii=False, indent=2), encoding="utf-8")
+        out.append(dict(video=str(v), duracion_s=round(p.duracion, 1), instantes=inst,
+                        laminas=[str(x) for x in laminas], revision_json=str(plantilla),
+                        instrucciones=str(Path(__file__).resolve().parents[2] / "docs" / "REVISION_VISUAL.md")))
+    print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
+    return 0
+
+
+def analizar(args) -> int:
     salida = Path(args.salida)
     salida.mkdir(parents=True, exist_ok=True)
     (salida / "capturas").mkdir(exist_ok=True)
@@ -114,50 +218,48 @@ def analizar(args) -> int:
     modo = args.modo if len(videos) > 1 else "combinar"
     metodos = [m.strip().lower() for m in args.metodos.split(",")]
 
-    fuentes, poses = [], []
-    for v, nom, des in zip(videos, nombres, desfases):
+    poses = []
+    for v in videos:
         print(f"MediaPipe: {v.name}…", file=sys.stderr)
         p = pose.estimar(v, args.fps_analisis, args.modelo, cache_dir=salida / "cache")
         if p.detectado.mean() == 0:
             print(f"No se detecta ninguna persona en {v.name}.", file=sys.stderr)
             return 3
-        res = medidas.calcular(p, cfg)
         poses.append(p)
-        fuentes.append(dict(nombre=nom, res=res, duracion=p.duracion, desfase=des))
 
-    tramos = leer_tramos(args.tramos_carga)
-    carga_en = funcion_carga(args.carga_kg, tramos)
-    obs = muestreo.observar(fuentes, cfg, carga_en, modo)
-    if not obs:
+    # Revisión visual (opcional): un revision.json por vídeo, o uno para todos.
+    revs = [None] * len(videos)
+    if args.revision:
+        if len(args.revision) not in (1, len(videos)):
+            print("--revision: uno por vídeo (en el mismo orden) o uno para todos", file=sys.stderr)
+            return 2
+        rutas = args.revision * len(videos) if len(args.revision) == 1 else args.revision
+        try:
+            revs = [revision.cargar(r, p.duracion) for r, p in zip(rutas, poses)]
+        except revision.RevisionInvalida as e:
+            print(str(e), file=sys.stderr)
+            return 2
+
+    print("Evaluación…", file=sys.stderr)
+    ev = evaluar(poses, nombres, desfases, args, metodos, modo, revs)
+    if not ev["obs"]:
         print("No hay observaciones (¿vídeos demasiado cortos o sin solape?).", file=sys.stderr)
         return 3
-    print("Estadística OWAS…", file=sys.stderr)
-    resumen = muestreo.resumir(obs, fuentes, cfg)
+    comparativa = None
+    if args.revision:
+        print("Evaluación sin revisión (para comparar)…", file=sys.stderr)
+        ev0 = evaluar(poses, nombres, desfases, args, metodos, modo, [None] * len(videos))
+        a, b = _cifras(ev0, metodos), _cifras(ev, metodos)
+        comparativa = [(k, a.get(k, ("—", None)), b.get(k, ("—", None))) for k in dict.fromkeys(list(a) + list(b))]
+    cfg, tarea, fuentes, obs, resumen, ergos = ev["cfg"], ev["tarea"], ev["fuentes"], ev["obs"], ev["resumen"], ev["ergos"]
+    tramos = ev["tramos"]
     diags = [grabacion.diagnostico(p, f["res"], cfg.filtros.visibilidad) for p, f in zip(poses, fuentes)]
-
-    # REBA y RULA (los dos lados de RULA), por vídeo.
-    tarea = construir_tarea(args)
-    ergos = {}
-    if "reba" in metodos or "rula" in metodos:
-        print("REBA y RULA…", file=sys.stderr)
-        for f in fuentes:
-            fs = ergo.serie(f["res"], cfg, tarea)
-            d = dict(serie=fs)
-            if "reba" in metodos:
-                d["reba"] = ergo.peor_postura(fs, "reba")
-                d["reba_val"] = ergo.validar_pico(d["reba"], "reba")
-                if d["reba"].get("evaluable"):
-                    d["reba"]["trazabilidad"] = ergo.trazabilidad(f["res"], d["reba"]["indice_pico"], ergo.CLAVES_REBA + [
-                        "brazo_abd_I", "brazo_abd_D", "muneca_I", "muneca_D", "tronco_giro", "tronco_lat"], cfg)
-            if "rula" in metodos:
-                d["rula"] = {s: ergo.peor_postura(fs, "rula", s) for s in "ID"}
-                d["rula_val"] = {s: ergo.validar_pico(d["rula"][s], "rula") for s in "ID"}
-                d["rula_lado"] = ergo.resumen_rula(d["rula"])
-                for s in "ID":
-                    if d["rula"][s].get("evaluable"):
-                        d["rula"][s]["trazabilidad"] = ergo.trazabilidad(f["res"], d["rula"][s]["indice_pico"], ergo.claves_rula(s) + [
-                            f"brazo_abd_{s}", f"muneca_{s}", f"antebrazo_lat_{s}", "tronco_giro", "tronco_lat"], cfg)
-            ergos[f["nombre"]] = d
+    revision_ctx = []
+    for nom, rev, pol in zip(nombres, revs, ev["politicas"]):
+        if rev:
+            revision_ctx.append(dict(video=nom, resumen=rev.get("resumen", ""), contexto=rev.get("contexto", {}),
+                                     fases=rev.get("fases", []), munecas=rev.get("munecas", []),
+                                     decisiones=pol["decisiones"] if pol else []))
 
     # Salidas gráficas
     imagenes = visual.graficos(obs, resumen, fuentes, salida, cfg.umbrales)
@@ -234,7 +336,8 @@ def analizar(args) -> int:
     ctx = dict(resumen=resumen, diagnosticos=diags, imagenes={k: v.name for k, v in imagenes.items()},
                capturas=capturas, videos=videos_out, umbrales=cfg.umbrales, ventana_s=cfg.muestreo.ventana_s,
                nombres_medidas={k: v["nombre"] for k, v in MEDIDAS.items()}, nombres_fuentes=nombres,
-               metodos=metodos, tarea=tarea, ergo=ergo_ctx, sin_margen=args.sin_margen,
+               metodos=metodos, tarea=tarea, ergo=ergo_ctx, sin_margen=args.sin_margen, origenes=ev["origenes"],
+               postura_base=ev["postura"], revision=revision_ctx, comparativa=comparativa,
                args=dict(carga_texto=carga_texto, turno_h=args.turno_h, modo_texto=modo_texto, modo=modo,
                          postura_base=args.postura_base, angulos=args.angulos))
     md = informe.markdown(ctx)
@@ -243,7 +346,8 @@ def analizar(args) -> int:
 
     datos = dict(aviso="Demostración no validada", convenciones=dict(CONVENCIONES, carga_owas=CONVENCION_CARGA_OWAS),
                  videos=diags, resumen=resumen, capturas=capturas, videos_esqueleto=videos_out, reba_rula=ergo_ctx,
-                 tarea=dict(vars(tarea), no_declarados=tarea.no_declarados()),
+                 tarea=dict(vars(tarea), no_declarados=tarea.no_declarados()), origenes=ev["origenes"],
+                 postura_base=ev["postura"], revision=revision_ctx, comparativa=comparativa,
                  parametros=dict(intervalo_s=args.intervalo, fps_analisis=args.fps_analisis, modelo=args.modelo, modo=modo,
                                  desfases=desfases, carga_kg=args.carga_kg, tramos_carga=tramos, turno_h=args.turno_h,
                                  postura_base=args.postura_base, angulos=args.angulos, sin_margen=args.sin_margen,
@@ -271,7 +375,9 @@ def analizar(args) -> int:
         rula={n: dict({s: corto_pico(d["rula"][s], d["rula_val"][s]) for s in "ID"}, peor_lado=d["rula_lado"])
               for n, d in ergos.items() if "rula" in d},
         avisos=resumen["avisos"], consejos=[c for d in diags for c in d["consejos"]],
-        no_declarados=tarea.no_declarados())
+        no_declarados=tarea.no_declarados(),
+        estimado_por_ia=[k for k, v in ev["origenes"].items() if v == "estimado por IA"],
+        comparativa={k: dict(sin_revision=a[0], con_revision=b[0]) for k, a, b in comparativa} if comparativa else None)
     print(json.dumps(corto, ensure_ascii=False, indent=2, default=_json))
     return 0
 
@@ -285,7 +391,20 @@ def main(argv=None) -> int:
     a.add_argument("--fps-analisis", type=float, default=10.0)
     a.set_defaults(func=inspeccionar)
 
+    r = sub.add_parser("revisar", help="Láminas para la revisión visual y plantilla de revision.json")
+    r.add_argument("--video", action="append", required=True)
+    r.add_argument("--salida", required=True)
+    r.add_argument("--intervalo", type=float, default=None, help="Segundos entre fotogramas de la lámina (por defecto, automático)")
+    r.add_argument("--max-fotogramas", type=int, default=48, help="Máximo de fotogramas por vídeo")
+    r.add_argument("--fps-analisis", type=float, default=10.0)
+    r.add_argument("--modelo", choices=["full", "heavy"], default="full")
+    r.set_defaults(func=revisar)
+
     b = sub.add_parser("analizar", help="Estudio OWAS, REBA y RULA")
+    b.add_argument("--revision", action="append", default=None,
+                   help="revision.json de la revisión visual (uno por vídeo, en orden, o uno para todos)")
+    b.add_argument("--rodillas", choices=["menos30", "30a60", "mas60"], default=None,
+                   help="Flexión de rodillas si no se ven (p. ej. sentado con las piernas fuera del encuadre)")
     b.add_argument("--video", action="append", required=True, help="Vídeo (repetible)")
     b.add_argument("--salida", required=True)
     b.add_argument("--metodos", default="owas,reba,rula", help="Métodos, separados por comas: owas, reba, rula")

@@ -11,6 +11,8 @@ import math
 
 from . import reglas as R
 from .config import Config, Umbrales, margen
+
+FACTOR_APROXIMADA = 1.5  # igual que revision.FACTOR_APROXIMADA (sin importar revision para evitar ciclos)
 from .tablas import categoria_combinacion
 
 nan = math.nan
@@ -24,15 +26,36 @@ def _iv(m: dict, k: str, mg, minimo=None):
     return R.intervalo(m.get(k, nan), mg(k), minimo)
 
 
-def piernas(m: dict, u: Umbrales, postura_base: str, mg) -> tuple[frozenset, list[str]]:
-    """Códigos de piernas posibles (1–7). Andar, arrodillarse y sentarse son heurísticas propias, provisionales."""
+RODILLAS_SUPUESTAS = {"menos30": 10.0, "30a60": 45.0, "mas60": 90.0}
+
+
+def piernas(m: dict, u: Umbrales, postura_base: str, mg, supuesto: dict | None = None) -> tuple[frozenset, list[str]]:
+    """Códigos de piernas posibles (1–7). Andar, arrodillarse y sentarse son heurísticas propias, provisionales.
+
+    `supuesto` (declarado o de la revisión visual): {"rodillas": "menos30"|"30a60"|"mas60", "apoyo":
+    "bilateral"|"unilateral"}. Solo rellena lo que no se ve; nunca sustituye a una medida."""
     notas = []
-    iv = lambda k, minimo=None: _iv(m, k, mg, minimo)  # noqa: E731
     out = set()
+    if postura_base == "sentado":
+        # Sentado declarado (o estimado en la revisión): las piernas no necesitan verse para OWAS.
+        return frozenset({1}), ["sentado_declarado"]
     if not _ok(m.get("rodilla_I", nan)) and not _ok(m.get("rodilla_D", nan)):
         notas.append("piernas_no_visibles")
     elif not _ok(m.get("rodilla_I", nan)) or not _ok(m.get("rodilla_D", nan)):
         notas.append("una_pierna_no_visible")
+    supuesto = supuesto or {}
+    rod_sup = RODILLAS_SUPUESTAS.get(supuesto.get("rodillas"))
+    if rod_sup is not None or supuesto.get("apoyo") == "bilateral":
+        m = dict(m)
+        for s_ in "ID":
+            if rod_sup is not None and not _ok(m.get(f"rodilla_{s_}", nan)):
+                m[f"rodilla_{s_}"] = rod_sup
+                if "rodillas_supuestas" not in notas:
+                    notas.append("rodillas_supuestas")
+        if supuesto.get("apoyo") == "bilateral" and not _ok(m.get("tobillos", nan)):
+            m["tobillos"] = 0.0
+            notas.append("apoyo_supuesto")
+    iv = lambda k, minimo=None: _iv(m, k, mg, minimo)  # noqa: E731
 
     andando = R.presente(iv("velocidad", 0.0), u.andando_velocidad)
     if True in andando:
@@ -43,7 +66,8 @@ def piernas(m: dict, u: Umbrales, postura_base: str, mg) -> tuple[frozenset, lis
     def lado_arrodillado(s):
         return {a and b for a in R.presente(iv(f"pierna_{s}", 0.0), u.arrodillado_pierna)
                 for b in R.presente(iv(f"rodilla_{s}", 0.0), 60.0)}
-    arrodillado = {a or b for a in lado_arrodillado("I") for b in lado_arrodillado("D")}
+    # De pie (declarado o estimado): ni arrodillado ni sentado.
+    arrodillado = {False} if postura_base == "de_pie" else {a or b for a in lado_arrodillado("I") for b in lado_arrodillado("D")}
     if True in arrodillado:
         out.add(6)
     if False not in arrodillado:
@@ -52,9 +76,6 @@ def piernas(m: dict, u: Umbrales, postura_base: str, mg) -> tuple[frozenset, lis
     # Sentado
     if postura_base == "de_pie":
         sentado = {False}
-    elif postura_base == "sentado":
-        sentado = {True}
-        notas.append("sentado_declarado")
     else:
         def media(a, b):
             if a is None or b is None:
@@ -104,7 +125,8 @@ def regiones(m: dict, cfg: Config, kg: float | None, postura_base: str, vista=No
              sin_margen: bool = False) -> dict:
     """Conjuntos de códigos posibles por región y notas de lo que falta."""
     u = cfg.umbrales
-    mg = (lambda k: 0.0) if sin_margen else (lambda k: margen(k, vista, modo))  # noqa: E731
+    aprox = m.get("_aprox", frozenset())
+    mg = (lambda k: 0.0) if sin_margen else (lambda k: margen(k, vista, modo) * (FACTOR_APROXIMADA if k in aprox else 1.0))  # noqa: E731
     iv = lambda k, minimo=None: _iv(m, k, mg, minimo)  # noqa: E731
     notas = []
     if not _ok(m.get("tronco_flex", nan)):
@@ -120,7 +142,7 @@ def regiones(m: dict, cfg: Config, kg: float | None, postura_base: str, vista=No
     elif len(vistos) == 1:
         notas.append("un_brazo_no_visible")
     bra = R.owas_brazos(iv("brazo_alt_I"), iv("brazo_alt_D"), u)
-    pie, np_ = piernas(m, u, postura_base, mg)
+    pie, np_ = piernas(m, u, postura_base, mg, getattr(cfg, "supuesto_piernas", None))
     car = R.owas_carga(kg)
     if kg is None:
         notas.append("carga_no_declarada")
@@ -150,8 +172,9 @@ def codigo_piernas(m: dict, u: Umbrales, postura_base: str = "auto") -> tuple[in
 
 
 def piernas_posibles(m: dict, cfg: Config, postura_base: str = "auto", vista=None, modo="") -> frozenset:
-    mg = (lambda k: 0.0) if cfg.muestreo.sin_margen else (lambda k: margen(k, vista, modo))  # noqa: E731
-    return piernas(m, cfg.umbrales, postura_base, mg)[0]
+    aprox = m.get("_aprox", frozenset())
+    mg = (lambda k: 0.0) if cfg.muestreo.sin_margen else (lambda k: margen(k, vista, modo) * (FACTOR_APROXIMADA if k in aprox else 1.0))  # noqa: E731
+    return piernas(m, cfg.umbrales, postura_base, mg, getattr(cfg, "supuesto_piernas", None))[0]
 
 
 def codigo_espalda(m: dict, u: Umbrales) -> tuple[int | None, list[str]]:
