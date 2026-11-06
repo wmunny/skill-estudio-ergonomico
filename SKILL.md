@@ -124,3 +124,4 @@ Según Aghazadeh y Xiong (KAIST, preprint SSRN 6035502, sin revisión por pares)
 - `scripts/informe_revision.py`: genera `docs/REVISION_METODOS.md` y `docs/revision_metodos.html` desde el código, para la revisión experta.
 - `ejemplos/salida_ejemplo/`: informe de ejemplo con dos vídeos sintéticos de paletizado.
 - `docs/LIMITACIONES.md`: qué no hace la herramienta y por qué no está validada.
+- `docs/ROADMAP.md`: próximos pasos (varias tomas no simultáneas del mismo puesto, validación, mejoras).
