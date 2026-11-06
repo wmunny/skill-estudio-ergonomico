@@ -4,9 +4,8 @@ __pycache__/
 .pytest_cache/
 tmp/
 salida*/
-!ejemplos/salida_ejemplo/
 # Modelos de MediaPipe: se descargan con scripts/descargar_modelos.py
 modelos/
-# Caché de poses y vídeos con esqueleto del ejemplo (se regeneran)
-ejemplos/**/cache/
-ejemplos/**/*.mp4
+# Estudios, informes y vídeos: se quedan en local, nunca van a GitHub
+estudios/
+ejemplos/

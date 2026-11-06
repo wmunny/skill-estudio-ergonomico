@@ -33,7 +33,7 @@ En el vídeo sintético de paletizado del ejemplo (30 s, cuerpo entero a 45°), 
 | `porcentajes.png`, `cronograma_<vídeo>.png` | Frecuencia de cada código OWAS; medidas y códigos en el tiempo |
 | `resumen.json`, `observaciones.csv` | Todos los números |
 
-Ejemplo: [ejemplos/salida_ejemplo/informe.md](ejemplos/salida_ejemplo/informe.md). Usa dos vídeos sintéticos de paletizado, generados con IA y sin personas reales.
+Los informes, capturas y vídeos que genera la herramienta no se versionan: se guardan en local en `estudios/` o `ejemplos/` (ambas en `.gitignore`).
 
 ## Instalación
 

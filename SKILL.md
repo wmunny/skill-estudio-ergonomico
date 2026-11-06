@@ -122,6 +122,6 @@ Según Aghazadeh y Xiong (KAIST, preprint SSRN 6035502, sin revisión por pares)
 - `scripts/ergovideo/sintetico.py`: esqueletos sintéticos para las pruebas.
 - `tests/`: `test_tablas.py` (904 celdas frente a `fixtures/tablas_ergonautas.json`), `test_fronteras.py` (cada umbral en a − ε, a y a + ε), `test_owas.py` y `test_reba_rula.py` (posturas sintéticas, desconocidos, márgenes, pruebas de aceptación de la auditoría).
 - `scripts/informe_revision.py`: genera `docs/REVISION_METODOS.md` y `docs/revision_metodos.html` desde el código, para la revisión experta.
-- `ejemplos/salida_ejemplo/`: informe de ejemplo con dos vídeos sintéticos de paletizado.
+- `estudios/` y `ejemplos/`: salidas locales (informes, capturas, vídeos). Están en `.gitignore` y nunca se suben al repositorio; guarda cada análisis en `estudios/<nombre-del-vídeo>/`.
 - `docs/LIMITACIONES.md`: qué no hace la herramienta y por qué no está validada.
 - `docs/ROADMAP.md`: próximos pasos (varias tomas no simultáneas del mismo puesto, validación, mejoras).
