@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+tmp/
+salida*/
+!ejemplos/salida_ejemplo/
+# Modelos de MediaPipe: se descargan con scripts/descargar_modelos.py
+modelos/
+# Caché de poses y vídeos con esqueleto del ejemplo (se regeneran)
+ejemplos/**/cache/
+ejemplos/**/*.mp4

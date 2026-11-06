@@ -1,0 +1,3620 @@
+{
+  "aviso": "Demostración no validada",
+  "convenciones": {
+    "OWAS": "Fronteras literales de Ergonautas; pierna flexionada si flexión ≥ 30° (muslo-pantorrilla ≤ 150°); brazo elevado si codo o muñeca están al nivel del hombro o por encima; carga según INSST (≤ 10 kg → 1).",
+    "REBA": "Fronteras literales de Ergonautas/NTP 601 (el valor límite va en el tramo que lo incluye con «≤»).",
+    "RULA": "En la frontera entre dos puntuaciones, la mayor (McAtamney, 2024, según la auditoría; pendiente de verificar el documento).",
+    "carga_owas": "INSST: ≤ 10 kg → 1; > 10 y ≤ 20 kg → 2; > 20 kg → 3"
+  },
+  "videos": [
+    {
+      "video": "C:\\Users\\jcaguilar\\Downloads\\manipulacion.mp4",
+      "duracion_s": 10.0,
+      "ancho": 1280,
+      "alto": 720,
+      "fps_video": 24.0,
+      "fps_analisis": 12.000000000000004,
+      "fotogramas": 120,
+      "modelo": "full",
+      "deteccion": 100.0,
+      "vista_frontal": 57.49999999999999,
+      "vista_45": 42.5,
+      "vista_lateral": 0.0,
+      "vista_mediana": 19.633384970977204,
+      "de_espaldas": 0.0,
+      "modo_2d": 0.0,
+      "altura_persona": 73.34836795926094,
+      "cobertura": {
+        "tronco_flex": 100.0,
+        "tronco_lat": 100.0,
+        "tronco_giro": 100.0,
+        "brazo_alt_I": 100.0,
+        "brazo_alt_D": 100.0,
+        "rodilla_I": 100.0,
+        "rodilla_D": 100.0,
+        "muslo_I": 100.0,
+        "muslo_D": 100.0,
+        "pierna_I": 100.0,
+        "pierna_D": 100.0,
+        "tronco_sag": 100.0,
+        "cuello": 100.0,
+        "brazo_flex_I": 100.0,
+        "brazo_flex_D": 99.16666666666667,
+        "brazo_abd_I": 100.0,
+        "brazo_abd_D": 100.0,
+        "codo_I": 99.16666666666667,
+        "codo_D": 98.33333333333333,
+        "muneca_I": 99.16666666666667,
+        "muneca_D": 98.33333333333333,
+        "antebrazo_lat_I": 99.16666666666667,
+        "antebrazo_lat_D": 98.33333333333333,
+        "tobillos": 100.0
+      },
+      "razones": {
+        "tronco_flex": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "tronco_lat": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "tronco_giro": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "brazo_alt_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "brazo_alt_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "rodilla_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "rodilla_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "muslo_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "muslo_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "pierna_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "pierna_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "tronco_sag": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "cuello": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "brazo_flex_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 1,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_flex_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 4,
+          "saltos": 0,
+          "interpolados": 3
+        },
+        "brazo_abd_I": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "brazo_abd_D": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "codo_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "codo_D": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 1,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "muneca_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "muneca_D": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 1,
+          "interpolados": 1
+        },
+        "antebrazo_lat_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "antebrazo_lat_D": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 1,
+          "interpolados": 1
+        },
+        "tobillos": {
+          "visibilidad": 0,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 0
+        },
+        "_puntos": {
+          "huesos": 3,
+          "coherencia": 0
+        }
+      },
+      "consejos": [
+        "El trabajador está de frente o de espaldas a la cámara el 57 % del tiempo: es la vista con más error angular para MediaPipe. Gira la cámara unos 45°."
+      ]
+    },
+    {
+      "video": "C:\\Users\\jcaguilar\\Downloads\\manipulacion-repetitivos.mp4",
+      "duracion_s": 20.0,
+      "ancho": 1280,
+      "alto": 720,
+      "fps_video": 24.0,
+      "fps_analisis": 11.999999999999995,
+      "fotogramas": 240,
+      "modelo": "full",
+      "deteccion": 99.58333333333333,
+      "vista_frontal": 28.451882845188287,
+      "vista_45": 55.64853556485355,
+      "vista_lateral": 15.899581589958158,
+      "vista_mediana": 49.23163322035765,
+      "de_espaldas": 0.0,
+      "modo_2d": 41.84100418410041,
+      "altura_persona": 77.51303613185883,
+      "cobertura": {
+        "tronco_flex": 100.0,
+        "tronco_lat": 100.0,
+        "tronco_giro": 100.0,
+        "brazo_alt_I": 100.0,
+        "brazo_alt_D": 100.0,
+        "rodilla_I": 52.916666666666664,
+        "rodilla_D": 52.916666666666664,
+        "muslo_I": 52.916666666666664,
+        "muslo_D": 52.916666666666664,
+        "pierna_I": 52.916666666666664,
+        "pierna_D": 52.916666666666664,
+        "tronco_sag": 100.0,
+        "cuello": 100.0,
+        "brazo_flex_I": 100.0,
+        "brazo_flex_D": 100.0,
+        "brazo_abd_I": 100.0,
+        "brazo_abd_D": 100.0,
+        "codo_I": 100.0,
+        "codo_D": 100.0,
+        "muneca_I": 100.0,
+        "muneca_D": 100.0,
+        "antebrazo_lat_I": 100.0,
+        "antebrazo_lat_D": 96.66666666666667,
+        "tobillos": 52.916666666666664
+      },
+      "razones": {
+        "tronco_flex": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "tronco_lat": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "tronco_giro": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_alt_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_alt_D": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "rodilla_I": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "rodilla_D": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "muslo_I": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "muslo_D": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "pierna_I": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "pierna_D": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "tronco_sag": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "cuello": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_flex_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_flex_D": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 4,
+          "saltos": 0,
+          "interpolados": 5
+        },
+        "brazo_abd_I": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "brazo_abd_D": {
+          "visibilidad": 1,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 1,
+          "saltos": 1,
+          "interpolados": 3
+        },
+        "codo_I": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 2
+        },
+        "codo_D": {
+          "visibilidad": 4,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 2,
+          "saltos": 2,
+          "interpolados": 8
+        },
+        "muneca_I": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 2
+        },
+        "muneca_D": {
+          "visibilidad": 4,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 2,
+          "interpolados": 6
+        },
+        "antebrazo_lat_I": {
+          "visibilidad": 2,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 1,
+          "saltos": 0,
+          "interpolados": 3
+        },
+        "antebrazo_lat_D": {
+          "visibilidad": 4,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 3,
+          "saltos": 6,
+          "interpolados": 5
+        },
+        "tobillos": {
+          "visibilidad": 114,
+          "huesos": 0,
+          "coherencia": 0,
+          "rango": 0,
+          "atipicos": 0,
+          "saltos": 0,
+          "interpolados": 1
+        },
+        "_puntos": {
+          "huesos": 4,
+          "coherencia": 0
+        }
+      },
+      "consejos": [
+        "Las piernas se ven poco: encuadra los pies y quita obstáculos (mesas, cajas) entre la cámara y el trabajador."
+      ]
+    }
+  ],
+  "resumen": {
+    "n_observaciones": 30,
+    "intervalo_s": 1.0,
+    "regiones": {
+      "espalda": {
+        "codificables": 30,
+        "cobertura": 100.0,
+        "nivel_cobertura": "verde",
+        "tau_s": 0.666666666666667,
+        "n_efectiva": 22.437499999999993,
+        "margen_max": 15.91000701662254,
+        "nivel_muestra": "ambar",
+        "duracion_necesaria_s": 128.05333333333337,
+        "codigos": {
+          "1": {
+            "nombre": "Espalda derecha",
+            "n": 23,
+            "porcentaje": 76.66666666666667,
+            "ic_aprox": [
+              59.04510786308587,
+              88.21903550393799
+            ],
+            "margen": 14.586963820426057,
+            "rango": [
+              26.666666666666668,
+              80.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": 0.5000000000000002,
+            "n_efectiva": 29.916666666666657
+          },
+          "2": {
+            "nombre": "Espalda doblada",
+            "n": 6,
+            "porcentaje": 20.0,
+            "ic_aprox": [
+              8.475531300899753,
+              40.29554533414483
+            ],
+            "margen": 15.91000701662254,
+            "rango": [
+              20.0,
+              46.666666666666664
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2
+            ],
+            "categoria_incierta": true,
+            "tau_s": 0.666666666666667,
+            "n_efectiva": 22.437499999999993
+          },
+          "3": {
+            "nombre": "Espalda con giro",
+            "n": 1,
+            "porcentaje": 3.3333333333333335,
+            "ic_aprox": [
+              0.590843799485738,
+              16.670751396958874
+            ],
+            "margen": 8.039953798736569,
+            "rango": [
+              0.0,
+              26.666666666666668
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2
+            ],
+            "categoria_incierta": true,
+            "tau_s": 0.3333333333333335,
+            "n_efectiva": 30
+          },
+          "4": {
+            "nombre": "Espalda doblada con giro",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              11.3517091390478
+            ],
+            "margen": 5.6758545695239,
+            "rango": [
+              0.0,
+              0.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2
+            ],
+            "categoria_incierta": true,
+            "tau_s": null,
+            "n_efectiva": 30
+          }
+        },
+        "notas": {}
+      },
+      "brazos": {
+        "codificables": 30,
+        "cobertura": 100.0,
+        "nivel_cobertura": "verde",
+        "tau_s": 1.0,
+        "n_efectiva": 30,
+        "margen_max": 5.6758545695239,
+        "nivel_muestra": "verde",
+        "duracion_necesaria_s": 192.07999999999996,
+        "codigos": {
+          "1": {
+            "nombre": "Los dos brazos bajos",
+            "n": 30,
+            "porcentaje": 100.0,
+            "ic_aprox": [
+              88.6482908609522,
+              100.0
+            ],
+            "margen": 5.6758545695238976,
+            "rango": [
+              100.0,
+              100.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": null,
+            "n_efectiva": 30
+          },
+          "2": {
+            "nombre": "Un brazo bajo y el otro elevado",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              11.3517091390478
+            ],
+            "margen": 5.6758545695239,
+            "rango": [
+              0.0,
+              0.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": null,
+            "n_efectiva": 30
+          },
+          "3": {
+            "nombre": "Los dos brazos elevados",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              11.3517091390478
+            ],
+            "margen": 5.6758545695239,
+            "rango": [
+              0.0,
+              0.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": null,
+            "n_efectiva": 30
+          }
+        },
+        "notas": {}
+      },
+      "piernas": {
+        "codificables": 21,
+        "cobertura": 70.0,
+        "nivel_cobertura": "ambar",
+        "tau_s": 0.666666666666667,
+        "n_efectiva": 15.187499999999993,
+        "margen_max": 13.22730176241691,
+        "nivel_muestra": "ambar",
+        "duracion_necesaria_s": 182.9333333333334,
+        "codigos": {
+          "1": {
+            "nombre": "Sentado",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              15.464382326420195
+            ],
+            "margen": 7.732191163210097,
+            "rango": [
+              0.0,
+              30.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": null,
+            "n_efectiva": 21
+          },
+          "2": {
+            "nombre": "De pie con las dos piernas rectas",
+            "n": 20,
+            "porcentaje": 95.23809523809523,
+            "ic_aprox": [
+              72.87811422828003,
+              99.33271775311385
+            ],
+            "margen": 13.22730176241691,
+            "rango": [
+              13.333333333333334,
+              100.0
+            ],
+            "categoria": 2,
+            "categoria_rango": [
+              1,
+              2
+            ],
+            "categoria_incierta": true,
+            "tau_s": 0.6666666666666665,
+            "n_efectiva": 15.187500000000004
+          },
+          "3": {
+            "nombre": "De pie con una pierna recta y la otra flexionada",
+            "n": 1,
+            "porcentaje": 4.761904761904762,
+            "ic_aprox": [
+              0.8455769471923293,
+              22.669816586235463
+            ],
+            "margen": 10.912119819521568,
+            "rango": [
+              0.0,
+              86.66666666666667
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              3
+            ],
+            "categoria_incierta": true,
+            "tau_s": 0.08333333333333331,
+            "n_efectiva": 21
+          },
+          "4": {
+            "nombre": "De pie o en cuclillas, piernas flexionadas, peso equilibrado",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              20.188027810038314
+            ],
+            "margen": 10.094013905019157,
+            "rango": [
+              0.0,
+              66.66666666666667
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2,
+              3
+            ],
+            "categoria_incierta": true,
+            "tau_s": 0.666666666666667,
+            "n_efectiva": 15.187499999999993
+          },
+          "5": {
+            "nombre": "De pie o en cuclillas, piernas flexionadas, peso desequilibrado",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              15.464382326420195
+            ],
+            "margen": 7.732191163210097,
+            "rango": [
+              0.0,
+              46.666666666666664
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2,
+              3
+            ],
+            "categoria_incierta": true,
+            "tau_s": null,
+            "n_efectiva": 21
+          },
+          "6": {
+            "nombre": "Arrodillado",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              15.464382326420195
+            ],
+            "margen": 7.732191163210097,
+            "rango": [
+              0.0,
+              30.0
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1,
+              2
+            ],
+            "categoria_incierta": true,
+            "tau_s": null,
+            "n_efectiva": 21
+          },
+          "7": {
+            "nombre": "Andando",
+            "n": 0,
+            "porcentaje": 0.0,
+            "ic_aprox": [
+              0.0,
+              20.188027810038314
+            ],
+            "margen": 10.094013905019157,
+            "rango": [
+              0.0,
+              13.333333333333334
+            ],
+            "categoria": 1,
+            "categoria_rango": [
+              1
+            ],
+            "categoria_incierta": false,
+            "tau_s": 0.666666666666667,
+            "n_efectiva": 15.187499999999993
+          }
+        },
+        "notas": {
+          "piernas_no_visibles": 9
+        }
+      }
+    },
+    "avisos": [
+      "La grabación dura 0,5 min. OWAS pide normalmente 20–40 min de observación o varios ciclos completos: el % de tiempo observable puede no representar el puesto.",
+      "Equivale a unas 15 observaciones independientes (estimación aproximada). OWAS da un error del 10 % con 100 observaciones; aquí el intervalo aproximado llega a ±16 puntos.",
+      "Piernas: el código nominal solo se conoce en el 70 % de las observaciones; el resto entra en los rangos."
+    ],
+    "duracion_s": 30.0,
+    "combinaciones": {
+      "codificables": 21,
+      "cobertura": 70.0,
+      "por_categoria": {
+        "1": {
+          "n": 15,
+          "porcentaje": 71.42857142857143,
+          "rango": [
+            16.666666666666668,
+            80.0
+          ]
+        },
+        "2": {
+          "n": 6,
+          "porcentaje": 28.571428571428573,
+          "rango": [
+            0.0,
+            83.33333333333333
+          ]
+        },
+        "3": {
+          "n": 0,
+          "porcentaje": 0.0,
+          "rango": [
+            0.0,
+            53.333333333333336
+          ]
+        },
+        "4": {
+          "n": 0,
+          "porcentaje": 0.0,
+          "rango": [
+            0.0,
+            23.333333333333332
+          ]
+        }
+      },
+      "frecuentes": [
+        {
+          "codigo": "1121",
+          "n": 14,
+          "porcentaje": 66.66666666666667,
+          "categoria": 1
+        },
+        {
+          "codigo": "2121",
+          "n": 5,
+          "porcentaje": 23.80952380952381,
+          "categoria": 2
+        },
+        {
+          "codigo": "2131",
+          "n": 1,
+          "porcentaje": 4.761904761904762,
+          "categoria": 2
+        },
+        {
+          "codigo": "3121",
+          "n": 1,
+          "porcentaje": 4.761904761904762,
+          "categoria": 1
+        }
+      ],
+      "categoria_max": 2,
+      "categoria_max_posible": 4,
+      "inciertas": 25
+    },
+    "camaras": {
+      "espalda": {
+        "manipulacion.mp4": 33.333333333333336,
+        "manipulacion-repetitivos.mp4": 66.66666666666667
+      },
+      "brazos": {
+        "manipulacion.mp4": 33.333333333333336,
+        "manipulacion-repetitivos.mp4": 66.66666666666667
+      },
+      "piernas": {
+        "manipulacion.mp4": 33.333333333333336,
+        "manipulacion-repetitivos.mp4": 66.66666666666667
+      }
+    },
+    "n_efectiva_min": 15.187499999999993
+  },
+  "capturas": [
+    {
+      "titulo": "manipulacion.mp4 · 2,5 s · OWAS 2121 · categoría 2",
+      "ruta": "capturas/manipulacion_00002.5s_owas2.jpg",
+      "metodo": "owas"
+    },
+    {
+      "titulo": "manipulacion.mp4 · 8,5 s · OWAS 1121 · categoría 1",
+      "ruta": "capturas/manipulacion_00008.5s_owas1.jpg",
+      "metodo": "owas"
+    },
+    {
+      "titulo": "manipulacion.mp4 · 5,9 s · REBA 9–10 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion_00005.9s_REBA9.jpg",
+      "metodo": "reba"
+    },
+    {
+      "titulo": "manipulacion.mp4 · 2,8 s · RULA izq. 7 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion_00002.8s_RULAizq7.jpg",
+      "metodo": "rula"
+    },
+    {
+      "titulo": "manipulacion.mp4 · 2,8 s · RULA dch. 7 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion_00002.8s_RULAdch7.jpg",
+      "metodo": "rula"
+    },
+    {
+      "titulo": "manipulacion-repetitivos.mp4 · 2,5 s · OWAS 2121 · categoría 2",
+      "ruta": "capturas/manipulacion-repetitivos_00002.5s_owas2.jpg",
+      "metodo": "owas"
+    },
+    {
+      "titulo": "manipulacion-repetitivos.mp4 · 8,5 s · OWAS 1121 · categoría 1",
+      "ruta": "capturas/manipulacion-repetitivos_00008.5s_owas1.jpg",
+      "metodo": "owas"
+    },
+    {
+      "titulo": "manipulacion-repetitivos.mp4 · 5,9 s · REBA 9–10 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion-repetitivos_00005.9s_REBA9.jpg",
+      "metodo": "reba"
+    },
+    {
+      "titulo": "manipulacion-repetitivos.mp4 · 2,8 s · RULA izq. 7 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion-repetitivos_00002.8s_RULAizq7.jpg",
+      "metodo": "rula"
+    },
+    {
+      "titulo": "manipulacion-repetitivos.mp4 · 2,7 s · RULA dch. 7 (peor postura sostenida)",
+      "ruta": "capturas/manipulacion-repetitivos_00002.7s_RULAdch7.jpg",
+      "metodo": "rula"
+    }
+  ],
+  "videos_esqueleto": [
+    "esqueleto_manipulacion.mp4",
+    "esqueleto_manipulacion-repetitivos.mp4"
+  ],
+  "reba_rula": {
+    "manipulacion.mp4": {
+      "reba": {
+        "evaluable": true,
+        "lado": null,
+        "pico": 9,
+        "pico_max": 10,
+        "t_pico": 5.916666666666667,
+        "indice_pico": 71,
+        "nivel": [
+          8,
+          3,
+          "Alto",
+          "Es necesaria la actuación cuanto antes."
+        ],
+        "nivel_max": [
+          8,
+          3,
+          "Alto",
+          "Es necesaria la actuación cuanto antes."
+        ],
+        "estado": "concluyente",
+        "vista_pico": 43.10250248798824,
+        "modo_pico": "3d",
+        "detalle": {
+          "rango": [
+            9,
+            10
+          ],
+          "completo": true,
+          "A": [
+            6,
+            7
+          ],
+          "B": [
+            5,
+            6
+          ],
+          "falta": [],
+          "elementos": {
+            "tronco": [
+              3,
+              4
+            ],
+            "cuello": [
+              2
+            ],
+            "piernas": [
+              2
+            ],
+            "carga": [
+              1
+            ],
+            "actividad": [
+              1
+            ],
+            "lados": {
+              "I": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2
+                ],
+                "muneca": [
+                  1,
+                  2
+                ],
+                "B": [
+                  5,
+                  6
+                ]
+              },
+              "D": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2
+                ],
+                "muneca": [
+                  1,
+                  2
+                ],
+                "B": [
+                  5,
+                  6
+                ]
+              }
+            }
+          }
+        },
+        "breve": {
+          "t": 5.666666666666667,
+          "indice": 68,
+          "pico": 9,
+          "pico_max": 11,
+          "duracion_s": 0.7499999999999998,
+          "detalle": {
+            "rango": [
+              9,
+              11
+            ],
+            "completo": true,
+            "A": [
+              6,
+              8
+            ],
+            "B": [
+              5,
+              6
+            ],
+            "falta": [],
+            "elementos": {
+              "tronco": [
+                3,
+                4
+              ],
+              "cuello": [
+                2
+              ],
+              "piernas": [
+                2,
+                3
+              ],
+              "carga": [
+                1
+              ],
+              "actividad": [
+                1
+              ],
+              "lados": {
+                "I": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2
+                  ],
+                  "B": [
+                    5,
+                    6
+                  ]
+                },
+                "D": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2
+                  ],
+                  "B": [
+                    5,
+                    6
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "criticas": [
+          {
+            "t": 5.916666666666667,
+            "indice": 71,
+            "pico": 9,
+            "pico_max": 10,
+            "detalle": {
+              "rango": [
+                9,
+                10
+              ],
+              "completo": true,
+              "A": [
+                6,
+                7
+              ],
+              "B": [
+                5,
+                6
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  3,
+                  4
+                ],
+                "cuello": [
+                  2
+                ],
+                "piernas": [
+                  2
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "t": 2.75,
+            "indice": 33,
+            "pico": 5,
+            "pico_max": 10,
+            "detalle": {
+              "rango": [
+                5,
+                10
+              ],
+              "completo": true,
+              "A": [
+                3,
+                7
+              ],
+              "B": [
+                5,
+                7
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  3
+                ],
+                "cuello": [
+                  1,
+                  2
+                ],
+                "piernas": [
+                  1,
+                  2,
+                  3
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      3,
+                      4
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      7
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "t": 9.0,
+            "indice": 108,
+            "pico": 4,
+            "pico_max": 9,
+            "detalle": {
+              "rango": [
+                5,
+                9
+              ],
+              "completo": true,
+              "A": [
+                3,
+                5
+              ],
+              "B": [
+                5,
+                7
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  2,
+                  3
+                ],
+                "cuello": [
+                  1,
+                  2
+                ],
+                "piernas": [
+                  1
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      2,
+                      3,
+                      4
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      3,
+                      7
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      3,
+                      4
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      7
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "cobertura": 100.0,
+        "completo": 99.16666666666667,
+        "huecos": [],
+        "distribucion": {
+          "1": 1.680672268907563,
+          "2": 90.75630252100841,
+          "3": 7.563025210084033
+        },
+        "falta": {
+          "codo_D": 2,
+          "muneca_D": 2,
+          "brazo_flex_D": 1,
+          "codo_I": 1,
+          "muneca_I": 1
+        },
+        "trazabilidad": [
+          {
+            "medida": "tronco_sag",
+            "valor": 56.6,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "cuello",
+            "valor": -13.5,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_flex_I",
+            "valor": 57.7,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_flex_D",
+            "valor": 63.0,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "codo_I",
+            "valor": 32.2,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "codo_D",
+            "valor": 29.4,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "rodilla_I",
+            "valor": 43.2,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "rodilla_D",
+            "valor": 48.0,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_abd_I",
+            "valor": 10.3,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_abd_D",
+            "valor": 5.1,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "muneca_I",
+            "valor": 9.4,
+            "margen": 15.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "muneca_D",
+            "valor": 25.4,
+            "margen": 15.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "tronco_giro",
+            "valor": 13.2,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "tronco_lat",
+            "valor": 5.7,
+            "margen": 5.0,
+            "origen": "medido"
+          }
+        ]
+      },
+      "reba_val": {
+        "nivel": "verde",
+        "motivos": [
+          "Rango 9–10 dentro del mismo nivel de actuación."
+        ]
+      },
+      "rula": {
+        "I": {
+          "evaluable": true,
+          "lado": "I",
+          "pico": 7,
+          "pico_max": 7,
+          "t_pico": 2.75,
+          "indice_pico": 33,
+          "nivel": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "nivel_max": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "estado": "concluyente",
+          "vista_pico": 32.93389840122901,
+          "modo_pico": "3d",
+          "detalle": {
+            "rango": [
+              7,
+              7
+            ],
+            "completo": true,
+            "C": [
+              7,
+              7
+            ],
+            "D": [
+              6,
+              10
+            ],
+            "lado": "I",
+            "falta": [],
+            "elementos": {
+              "brazo": [
+                3
+              ],
+              "antebrazo": [
+                3
+              ],
+              "muneca": [
+                2,
+                3
+              ],
+              "giro": [
+                1
+              ],
+              "cuello": [
+                1,
+                4
+              ],
+              "tronco": [
+                3
+              ],
+              "piernas": [
+                1,
+                2
+              ],
+              "musculo": [
+                1
+              ],
+              "fuerza": [
+                2
+              ]
+            }
+          },
+          "breve": {
+            "t": 2.5,
+            "indice": 30,
+            "pico": 7,
+            "pico_max": 7,
+            "duracion_s": 0.6666666666666665,
+            "detalle": {
+              "rango": [
+                7,
+                7
+              ],
+              "completo": true,
+              "C": [
+                7,
+                7
+              ],
+              "D": [
+                6,
+                10
+              ],
+              "lado": "I",
+              "falta": [],
+              "elementos": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2,
+                  3
+                ],
+                "muneca": [
+                  2,
+                  3
+                ],
+                "giro": [
+                  1
+                ],
+                "cuello": [
+                  1,
+                  4
+                ],
+                "tronco": [
+                  3
+                ],
+                "piernas": [
+                  1,
+                  2
+                ],
+                "musculo": [
+                  1
+                ],
+                "fuerza": [
+                  2
+                ]
+              }
+            }
+          },
+          "criticas": [
+            {
+              "t": 2.75,
+              "indice": 33,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  7
+                ],
+                "D": [
+                  6,
+                  10
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    3
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 5.75,
+              "indice": 69,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  6,
+                  7
+                ],
+                "D": [
+                  9,
+                  10
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    4
+                  ],
+                  "tronco": [
+                    3,
+                    4
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 8.833333333333334,
+              "indice": 106,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  8
+                ],
+                "D": [
+                  5,
+                  9
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    2,
+                    3
+                  ],
+                  "piernas": [
+                    1
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            }
+          ],
+          "cobertura": 100.0,
+          "completo": 100.0,
+          "huecos": [],
+          "distribucion": {
+            "3": 74.16666666666667,
+            "4": 25.833333333333332
+          },
+          "falta": {
+            "codo_I": 1,
+            "muneca_I": 1,
+            "antebrazo_lat_I": 1
+          },
+          "trazabilidad": [
+            {
+              "medida": "tronco_sag",
+              "valor": 31.2,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "cuello",
+              "valor": -3.8,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_flex_I",
+              "valor": 64.5,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "codo_I",
+              "valor": 22.9,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_abd_I",
+              "valor": 18.6,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "muneca_I",
+              "valor": 25.5,
+              "margen": 15.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "antebrazo_lat_I",
+              "valor": -0.4,
+              "margen": 0.3,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_giro",
+              "valor": 12.6,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_lat",
+              "valor": 11.7,
+              "margen": 5.0,
+              "origen": "medido"
+            }
+          ]
+        },
+        "D": {
+          "evaluable": true,
+          "lado": "D",
+          "pico": 7,
+          "pico_max": 7,
+          "t_pico": 2.75,
+          "indice_pico": 33,
+          "nivel": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "nivel_max": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "estado": "concluyente",
+          "vista_pico": 32.93389840122901,
+          "modo_pico": "3d",
+          "detalle": {
+            "rango": [
+              7,
+              7
+            ],
+            "completo": true,
+            "C": [
+              6,
+              8
+            ],
+            "D": [
+              6,
+              10
+            ],
+            "lado": "D",
+            "falta": [],
+            "elementos": {
+              "brazo": [
+                3,
+                4
+              ],
+              "antebrazo": [
+                2,
+                3
+              ],
+              "muneca": [
+                1,
+                2,
+                3
+              ],
+              "giro": [
+                1
+              ],
+              "cuello": [
+                1,
+                4
+              ],
+              "tronco": [
+                3
+              ],
+              "piernas": [
+                1,
+                2
+              ],
+              "musculo": [
+                1
+              ],
+              "fuerza": [
+                2
+              ]
+            }
+          },
+          "breve": {
+            "t": 2.5,
+            "indice": 30,
+            "pico": 7,
+            "pico_max": 7,
+            "duracion_s": 0.6666666666666665,
+            "detalle": {
+              "rango": [
+                7,
+                7
+              ],
+              "completo": true,
+              "C": [
+                7,
+                8
+              ],
+              "D": [
+                6,
+                10
+              ],
+              "lado": "D",
+              "falta": [],
+              "elementos": {
+                "brazo": [
+                  4
+                ],
+                "antebrazo": [
+                  3
+                ],
+                "muneca": [
+                  2,
+                  3
+                ],
+                "giro": [
+                  1
+                ],
+                "cuello": [
+                  1,
+                  4
+                ],
+                "tronco": [
+                  3
+                ],
+                "piernas": [
+                  1,
+                  2
+                ],
+                "musculo": [
+                  1
+                ],
+                "fuerza": [
+                  2
+                ]
+              }
+            }
+          },
+          "criticas": [
+            {
+              "t": 2.75,
+              "indice": 33,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  6,
+                  8
+                ],
+                "D": [
+                  6,
+                  10
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    2,
+                    3
+                  ],
+                  "muneca": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    3
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 5.75,
+              "indice": 69,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  7
+                ],
+                "D": [
+                  9,
+                  10
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    4
+                  ],
+                  "tronco": [
+                    3,
+                    4
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 8.75,
+              "indice": 105,
+              "pico": 6,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  8
+                ],
+                "D": [
+                  5,
+                  9
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    2,
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    2,
+                    3
+                  ],
+                  "piernas": [
+                    1
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            }
+          ],
+          "cobertura": 100.0,
+          "completo": 99.16666666666667,
+          "huecos": [],
+          "distribucion": {
+            "3": 73.94957983193277,
+            "4": 26.050420168067227
+          },
+          "falta": {
+            "codo_D": 2,
+            "muneca_D": 2,
+            "antebrazo_lat_D": 2,
+            "brazo_flex_D": 1
+          },
+          "trazabilidad": [
+            {
+              "medida": "tronco_sag",
+              "valor": 31.2,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "cuello",
+              "valor": -3.8,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_flex_D",
+              "valor": 59.9,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "codo_D",
+              "valor": 42.3,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_abd_D",
+              "valor": 35.2,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "muneca_D",
+              "valor": 12.3,
+              "margen": 15.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "antebrazo_lat_D",
+              "valor": 2.0,
+              "margen": 0.3,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_giro",
+              "valor": 12.6,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_lat",
+              "valor": 11.7,
+              "margen": 5.0,
+              "origen": "medido"
+            }
+          ]
+        }
+      },
+      "rula_val": {
+        "I": {
+          "nivel": "verde",
+          "motivos": []
+        },
+        "D": {
+          "nivel": "verde",
+          "motivos": []
+        }
+      },
+      "rula_lado": "I"
+    },
+    "manipulacion-repetitivos.mp4": {
+      "reba": {
+        "evaluable": true,
+        "lado": null,
+        "pico": 9,
+        "pico_max": 10,
+        "t_pico": 5.916666666666667,
+        "indice_pico": 71,
+        "nivel": [
+          8,
+          3,
+          "Alto",
+          "Es necesaria la actuación cuanto antes."
+        ],
+        "nivel_max": [
+          8,
+          3,
+          "Alto",
+          "Es necesaria la actuación cuanto antes."
+        ],
+        "estado": "concluyente",
+        "vista_pico": 43.18269231388209,
+        "modo_pico": "3d",
+        "detalle": {
+          "rango": [
+            9,
+            10
+          ],
+          "completo": true,
+          "A": [
+            6,
+            7
+          ],
+          "B": [
+            5,
+            6
+          ],
+          "falta": [],
+          "elementos": {
+            "tronco": [
+              3,
+              4
+            ],
+            "cuello": [
+              2
+            ],
+            "piernas": [
+              2
+            ],
+            "carga": [
+              1
+            ],
+            "actividad": [
+              1
+            ],
+            "lados": {
+              "I": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2
+                ],
+                "muneca": [
+                  1,
+                  2
+                ],
+                "B": [
+                  5,
+                  6
+                ]
+              },
+              "D": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2
+                ],
+                "muneca": [
+                  1,
+                  2
+                ],
+                "B": [
+                  5,
+                  6
+                ]
+              }
+            }
+          }
+        },
+        "breve": {
+          "t": 5.666666666666667,
+          "indice": 68,
+          "pico": 9,
+          "pico_max": 11,
+          "duracion_s": 0.7500000000000003,
+          "detalle": {
+            "rango": [
+              9,
+              11
+            ],
+            "completo": true,
+            "A": [
+              6,
+              8
+            ],
+            "B": [
+              5,
+              6
+            ],
+            "falta": [],
+            "elementos": {
+              "tronco": [
+                3,
+                4
+              ],
+              "cuello": [
+                2
+              ],
+              "piernas": [
+                2,
+                3
+              ],
+              "carga": [
+                1
+              ],
+              "actividad": [
+                1
+              ],
+              "lados": {
+                "I": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2
+                  ],
+                  "B": [
+                    5,
+                    6
+                  ]
+                },
+                "D": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2
+                  ],
+                  "B": [
+                    5,
+                    6
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "criticas": [
+          {
+            "t": 5.916666666666667,
+            "indice": 71,
+            "pico": 9,
+            "pico_max": 10,
+            "detalle": {
+              "rango": [
+                9,
+                10
+              ],
+              "completo": true,
+              "A": [
+                6,
+                7
+              ],
+              "B": [
+                5,
+                6
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  3,
+                  4
+                ],
+                "cuello": [
+                  2
+                ],
+                "piernas": [
+                  2
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "t": 2.6666666666666665,
+            "indice": 32,
+            "pico": 5,
+            "pico_max": 10,
+            "detalle": {
+              "rango": [
+                5,
+                10
+              ],
+              "completo": true,
+              "A": [
+                3,
+                7
+              ],
+              "B": [
+                5,
+                7
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  3
+                ],
+                "cuello": [
+                  1,
+                  2
+                ],
+                "piernas": [
+                  1,
+                  2,
+                  3
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      6
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      3,
+                      4
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      5,
+                      7
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "t": 9.0,
+            "indice": 108,
+            "pico": 4,
+            "pico_max": 8,
+            "detalle": {
+              "rango": [
+                4,
+                10
+              ],
+              "completo": true,
+              "A": [
+                3,
+                6
+              ],
+              "B": [
+                3,
+                7
+              ],
+              "falta": [],
+              "elementos": {
+                "tronco": [
+                  2,
+                  3
+                ],
+                "cuello": [
+                  1,
+                  2
+                ],
+                "piernas": [
+                  1,
+                  2
+                ],
+                "carga": [
+                  1
+                ],
+                "actividad": [
+                  1
+                ],
+                "lados": {
+                  "I": {
+                    "brazo": [
+                      2,
+                      3,
+                      4
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      3,
+                      7
+                    ]
+                  },
+                  "D": {
+                    "brazo": [
+                      2,
+                      3
+                    ],
+                    "antebrazo": [
+                      2
+                    ],
+                    "muneca": [
+                      1,
+                      2
+                    ],
+                    "B": [
+                      3,
+                      6
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "cobertura": 99.58333333333333,
+        "completo": 99.58333333333333,
+        "huecos": [],
+        "distribucion": {
+          "1": 35.14644351464435,
+          "2": 61.08786610878661,
+          "3": 3.7656903765690375
+        },
+        "falta": {
+          "rodilla_I": 113,
+          "rodilla_D": 113
+        },
+        "trazabilidad": [
+          {
+            "medida": "tronco_sag",
+            "valor": 56.2,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "cuello",
+            "valor": -12.9,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_flex_I",
+            "valor": 58.0,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_flex_D",
+            "valor": 62.9,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "codo_I",
+            "valor": 32.2,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "codo_D",
+            "valor": 29.0,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "rodilla_I",
+            "valor": 41.3,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "rodilla_D",
+            "valor": 46.4,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_abd_I",
+            "valor": 11.2,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "brazo_abd_D",
+            "valor": 4.1,
+            "margen": 10.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "muneca_I",
+            "valor": 7.3,
+            "margen": 15.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "muneca_D",
+            "valor": 25.4,
+            "margen": 15.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "tronco_giro",
+            "valor": 13.1,
+            "margen": 5.0,
+            "origen": "medido"
+          },
+          {
+            "medida": "tronco_lat",
+            "valor": 6.1,
+            "margen": 5.0,
+            "origen": "medido"
+          }
+        ]
+      },
+      "reba_val": {
+        "nivel": "verde",
+        "motivos": [
+          "Rango 9–10 dentro del mismo nivel de actuación."
+        ]
+      },
+      "rula": {
+        "I": {
+          "evaluable": true,
+          "lado": "I",
+          "pico": 7,
+          "pico_max": 7,
+          "t_pico": 2.75,
+          "indice_pico": 33,
+          "nivel": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "nivel_max": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "estado": "concluyente",
+          "vista_pico": 32.80735879212885,
+          "modo_pico": "3d",
+          "detalle": {
+            "rango": [
+              7,
+              7
+            ],
+            "completo": true,
+            "C": [
+              7,
+              7
+            ],
+            "D": [
+              9,
+              10
+            ],
+            "lado": "I",
+            "falta": [],
+            "elementos": {
+              "brazo": [
+                3
+              ],
+              "antebrazo": [
+                3
+              ],
+              "muneca": [
+                2,
+                3
+              ],
+              "giro": [
+                1
+              ],
+              "cuello": [
+                4
+              ],
+              "tronco": [
+                3
+              ],
+              "piernas": [
+                1,
+                2
+              ],
+              "musculo": [
+                1
+              ],
+              "fuerza": [
+                2
+              ]
+            }
+          },
+          "breve": {
+            "t": 2.5,
+            "indice": 30,
+            "pico": 7,
+            "pico_max": 7,
+            "duracion_s": 0.666666666666667,
+            "detalle": {
+              "rango": [
+                7,
+                7
+              ],
+              "completo": true,
+              "C": [
+                7,
+                7
+              ],
+              "D": [
+                6,
+                10
+              ],
+              "lado": "I",
+              "falta": [],
+              "elementos": {
+                "brazo": [
+                  3
+                ],
+                "antebrazo": [
+                  2,
+                  3
+                ],
+                "muneca": [
+                  2,
+                  3
+                ],
+                "giro": [
+                  1
+                ],
+                "cuello": [
+                  1,
+                  4
+                ],
+                "tronco": [
+                  3
+                ],
+                "piernas": [
+                  1,
+                  2
+                ],
+                "musculo": [
+                  1
+                ],
+                "fuerza": [
+                  2
+                ]
+              }
+            }
+          },
+          "criticas": [
+            {
+              "t": 2.75,
+              "indice": 33,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  7
+                ],
+                "D": [
+                  9,
+                  10
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    4
+                  ],
+                  "tronco": [
+                    3
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 5.75,
+              "indice": 69,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  6,
+                  7
+                ],
+                "D": [
+                  9,
+                  10
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    4
+                  ],
+                  "tronco": [
+                    3,
+                    4
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 8.833333333333334,
+              "indice": 106,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  8
+                ],
+                "D": [
+                  5,
+                  10
+                ],
+                "lado": "I",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    2,
+                    3
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            }
+          ],
+          "cobertura": 99.58333333333333,
+          "completo": 99.58333333333333,
+          "huecos": [],
+          "distribucion": {
+            "3": 86.61087866108787,
+            "4": 13.389121338912133
+          },
+          "falta": {},
+          "trazabilidad": [
+            {
+              "medida": "tronco_sag",
+              "valor": 31.5,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "cuello",
+              "valor": -5.1,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_flex_I",
+              "valor": 65.3,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "codo_I",
+              "valor": 23.8,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_abd_I",
+              "valor": 18.6,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "muneca_I",
+              "valor": 26.1,
+              "margen": 15.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "antebrazo_lat_I",
+              "valor": -0.5,
+              "margen": 0.3,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_giro",
+              "valor": 12.8,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_lat",
+              "valor": 11.3,
+              "margen": 5.0,
+              "origen": "medido"
+            }
+          ]
+        },
+        "D": {
+          "evaluable": true,
+          "lado": "D",
+          "pico": 7,
+          "pico_max": 7,
+          "t_pico": 2.6666666666666665,
+          "indice_pico": 32,
+          "nivel": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "nivel_max": [
+            7,
+            4,
+            "Nivel 4",
+            "Se requieren cambios urgentes en la tarea."
+          ],
+          "estado": "concluyente",
+          "vista_pico": 31.162540293416647,
+          "modo_pico": "3d",
+          "detalle": {
+            "rango": [
+              7,
+              7
+            ],
+            "completo": true,
+            "C": [
+              6,
+              8
+            ],
+            "D": [
+              6,
+              10
+            ],
+            "lado": "D",
+            "falta": [],
+            "elementos": {
+              "brazo": [
+                3,
+                4
+              ],
+              "antebrazo": [
+                2,
+                3
+              ],
+              "muneca": [
+                1,
+                2,
+                3
+              ],
+              "giro": [
+                1
+              ],
+              "cuello": [
+                1,
+                4
+              ],
+              "tronco": [
+                3
+              ],
+              "piernas": [
+                1,
+                2
+              ],
+              "musculo": [
+                1
+              ],
+              "fuerza": [
+                2
+              ]
+            }
+          },
+          "breve": {
+            "t": 2.4166666666666665,
+            "indice": 29,
+            "pico": 7,
+            "pico_max": 7,
+            "duracion_s": 0.7500000000000003,
+            "detalle": {
+              "rango": [
+                7,
+                7
+              ],
+              "completo": true,
+              "C": [
+                7,
+                8
+              ],
+              "D": [
+                5,
+                10
+              ],
+              "lado": "D",
+              "falta": [],
+              "elementos": {
+                "brazo": [
+                  3,
+                  4
+                ],
+                "antebrazo": [
+                  2,
+                  3
+                ],
+                "muneca": [
+                  2,
+                  3
+                ],
+                "giro": [
+                  1
+                ],
+                "cuello": [
+                  1,
+                  4
+                ],
+                "tronco": [
+                  2,
+                  3
+                ],
+                "piernas": [
+                  1,
+                  2
+                ],
+                "musculo": [
+                  1
+                ],
+                "fuerza": [
+                  2
+                ]
+              }
+            }
+          },
+          "criticas": [
+            {
+              "t": 2.6666666666666665,
+              "indice": 32,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  6,
+                  8
+                ],
+                "D": [
+                  6,
+                  10
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    2,
+                    3
+                  ],
+                  "muneca": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    3
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 5.666666666666667,
+              "indice": 68,
+              "pico": 7,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  7
+                ],
+                "D": [
+                  9,
+                  10
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3
+                  ],
+                  "antebrazo": [
+                    2
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    4
+                  ],
+                  "tronco": [
+                    3,
+                    4
+                  ],
+                  "piernas": [
+                    1,
+                    2
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "t": 8.75,
+              "indice": 105,
+              "pico": 6,
+              "pico_max": 7,
+              "detalle": {
+                "rango": [
+                  7,
+                  7
+                ],
+                "completo": true,
+                "C": [
+                  7,
+                  8
+                ],
+                "D": [
+                  5,
+                  9
+                ],
+                "lado": "D",
+                "falta": [],
+                "elementos": {
+                  "brazo": [
+                    3,
+                    4
+                  ],
+                  "antebrazo": [
+                    2,
+                    3
+                  ],
+                  "muneca": [
+                    2,
+                    3
+                  ],
+                  "giro": [
+                    1
+                  ],
+                  "cuello": [
+                    1,
+                    4
+                  ],
+                  "tronco": [
+                    2,
+                    3
+                  ],
+                  "piernas": [
+                    1
+                  ],
+                  "musculo": [
+                    1
+                  ],
+                  "fuerza": [
+                    2
+                  ]
+                }
+              }
+            }
+          ],
+          "cobertura": 99.58333333333333,
+          "completo": 99.58333333333333,
+          "huecos": [],
+          "distribucion": {
+            "3": 85.77405857740585,
+            "4": 14.225941422594142
+          },
+          "falta": {
+            "antebrazo_lat_D": 7
+          },
+          "trazabilidad": [
+            {
+              "medida": "tronco_sag",
+              "valor": 30.6,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "cuello",
+              "valor": -4.6,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_flex_D",
+              "valor": 61.5,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "codo_D",
+              "valor": 36.4,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "brazo_abd_D",
+              "valor": 36.5,
+              "margen": 10.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "muneca_D",
+              "valor": 14.1,
+              "margen": 15.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "antebrazo_lat_D",
+              "valor": 2.2,
+              "margen": 0.3,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_giro",
+              "valor": 10.8,
+              "margen": 5.0,
+              "origen": "medido"
+            },
+            {
+              "medida": "tronco_lat",
+              "valor": 11.6,
+              "margen": 5.0,
+              "origen": "medido"
+            }
+          ]
+        }
+      },
+      "rula_val": {
+        "I": {
+          "nivel": "verde",
+          "motivos": []
+        },
+        "D": {
+          "nivel": "verde",
+          "motivos": []
+        }
+      },
+      "rula_lado": "I"
+    }
+  },
+  "tarea": {
+    "carga_kg": 5.0,
+    "fuerza_brusca": false,
+    "agarre": 1,
+    "actividad": {
+      "estatica": false,
+      "repetitiva": true,
+      "cambios": false
+    },
+    "muneca": null,
+    "muneca_desviada": false,
+    "muneca_giro_extremo": false,
+    "hombro_elevado": false,
+    "brazo_apoyado": false,
+    "brazo_rotado": false,
+    "cuello_girado": false,
+    "cuello_inclinado": false,
+    "apoyo_piernas": null,
+    "no_declarados": []
+  },
+  "parametros": {
+    "intervalo_s": 1.0,
+    "fps_analisis": 10.0,
+    "modelo": "full",
+    "modo": "combinar",
+    "desfases": [
+      0.0,
+      0.0
+    ],
+    "carga_kg": 5.0,
+    "tramos_carga": [],
+    "turno_h": 8.0,
+    "postura_base": "auto",
+    "angulos": "auto",
+    "sin_margen": false,
+    "umbrales": {
+      "espalda_flexion": 20.0,
+      "espalda_giro": 20.0,
+      "espalda_lateral": 20.0,
+      "rodilla_flexion": 30.0,
+      "brazo_margen": 0.0,
+      "arrodillado_pierna": 60.0,
+      "sentado_muslo": 55.0,
+      "sentado_pierna": 35.0,
+      "pie_levantado_m": 0.08,
+      "asimetria_rodillas": 30.0,
+      "andando_velocidad": 0.6,
+      "giro_presente": 20.0,
+      "brazo_abducido": 30.0,
+      "antebrazo_cruza": 0.0,
+      "antebrazo_fuera": 2.0
+    },
+    "filtros": {
+      "visibilidad": 0.5,
+      "visibilidad_giro": 0.3,
+      "tolerancia_hueso": 0.3,
+      "coherencia_vertical": 0.5,
+      "hampel_ventana_s": 0.5,
+      "hampel_sigmas": 3.0,
+      "hampel_minimo": 12.0,
+      "tramo_minimo_s": 0.4,
+      "hueco_maximo_s": 0.3,
+      "vista_lateral": 55.0
+    }
+  }
+}
