@@ -88,12 +88,12 @@ Claude seguirá [SKILL.md](SKILL.md): te preguntará la carga, el agarre, la act
 
    El cálculo es en 2D cuando el trabajador está de perfil y en 3D en el resto. Si un lado está tapado, se usa el visible.
 3. **Filtros** ([filtros.py](scripts/ergovideo/filtros.py)): longitud de huesos constante y coherencia 2D–3D por punto. En cada serie: rango fisiológico, Hampel, saltos imposibles y relleno solo de huecos cortos.
-4. **OWAS** ([clasificar.py](scripts/ergovideo/clasificar.py), [muestreo.py](scripts/ergovideo/muestreo.py)): códigos con los umbrales del método (Mattila et al., 1999), categorías por combinación y por frecuencia, un fotograma real por observación, % del tiempo observable con intervalo aproximado (Wilson con muestra efectiva por código; cobertura no verificada) y rango con margen y datos que faltan.
+4. **OWAS** ([clasificar.py](scripts/ergovideo/clasificar.py), [muestreo.py](scripts/ergovideo/muestreo.py)): códigos con los umbrales del método (los de Ergonautas, que cita a Mattila et al., 1999), categorías por combinación y por frecuencia, un fotograma real por observación, % del tiempo observable con intervalo aproximado (Wilson con muestra efectiva por código; cobertura no verificada) y rango con margen y datos que faltan.
 5. **REBA y RULA** ([ergo.py](scripts/ergovideo/ergo.py)): tablas A, B y C con todos los modificadores. Cada fotograma se puntúa como rango (lo que no se mide se recorre entero). La peor postura es el máximo de la puntuación mínima en ventanas de 0,5 s, de modo que un fotograma mal estimado no la fija. También se dan las posturas críticas y la distribución por niveles.
 6. **Validez por método:**
    - **OWAS:** cobertura, margen del % de tiempo y duración.
    - **REBA y RULA:** fotogramas evaluables (REBA con los dos brazos) y si la peor postura es un rango, solo tiene un brazo, se ve de frente o de espaldas, o queda junto a un hueco largo.
-7. **Tablas** ([tablas.py](scripts/ergovideo/tablas.py)): OWAS, REBA y RULA leídas de las tablas HTML de [Ergonautas](https://www.ergonautas.upv.es/) (UPV), con pruebas que fijan celdas comprobadas a mano.
+7. **Tablas** ([tablas.py](scripts/ergovideo/tablas.py)): OWAS, REBA y RULA transcritas de las ayudas de [Ergonautas](https://www.ergonautas.upv.es/) (UPV), con algunas convenciones del INSST. Detalle en [Fuentes](#fuentes).
 
 ## Cómo colocar la cámara
 
@@ -121,6 +121,22 @@ Resumen de Aghazadeh y Xiong (KAIST, [SSRN 6035502](https://ssrn.com/abstract=60
 - **Fronteras:** cada umbral en a − ε, a y a + ε con el valor esperado escrito a mano.
 - **OWAS:** posturas sintéticas de frente, a 45° y de perfil; datos que faltan (nunca favorables); margen; filtros, muestreo y elección de cámara.
 - **REBA y RULA:** celdas de las tablas A, B y C y niveles. Posturas sintéticas calculadas a mano en tres vistas: neutra, exigente con carga, brazo abducido, extensiones, antebrazo cruzando la línea media y muñeca. También rangos cuando falta un dato, datos declarados, carga de RULA, peor postura sostenida frente a un fotograma erróneo y validez con un brazo tapado.
+
+## Fuentes
+
+Qué se tomó de cada fuente. El detalle, regla a regla, está en [docs/REVISION_METODOS.md](docs/REVISION_METODOS.md).
+
+| Fuente | Qué se tomó | Cómo se usó |
+| --- | --- | --- |
+| **Ergonautas** (Universitat Politècnica de València): ayudas de [OWAS](https://www.ergonautas.upv.es/metodos/owas/owas-ayuda.php), [REBA](https://www.ergonautas.upv.es/metodos/reba/reba-ayuda.php) y [RULA](https://www.ergonautas.upv.es/metodos/rula/rula-ayuda.php), leídas el 06/11/2026 | Las 904 celdas de las tablas de los tres métodos, los umbrales de los elementos y la tabla de error de OWAS según el número de observaciones | **Fuente principal** de las tablas ([tablas.py](scripts/ergovideo/tablas.py)) y de la copia con la que se prueban ([tests/fixtures/tablas_ergonautas.json](tests/fixtures/tablas_ergonautas.json)). En OWAS y REBA, los valores en el límite entre dos tramos siguen su lectura literal |
+| **INSST** (antes INSHT): *Posturas de trabajo: evaluación del riesgo* (2015), figuras 5 y 6 (OWAS) | Carga en OWAS: ≤ 10 kg → 1; > 10 y ≤ 20 kg → 2; > 20 kg → 3. Brazo elevado si está «al nivel del hombro o por encima» | **Convenciones** que se aplican en lugar de las de Ergonautas (que pone 10 kg en el tramo 2) y **contraste**: con su figura 6 se corrigió la combinación OWAS 3143 (categoría 3, no 4) |
+| **INSST**: NTP 601, *Evaluación de las condiciones de trabajo: carga postural. Método REBA* | Tablas y modificadores de REBA | **Contraste** de REBA |
+| **Artículos originales**: Karhu, Kansi y Kuorinka (1977), OWAS; Hignett y McAtamney (2000), REBA; McAtamney y Corlett (1993), RULA | Definición de los métodos | **Referencia** de cada método. En RULA, el apoyo del brazo (−1) sigue el original de 1993. Las tablas no se han contrastado celda a celda con los originales |
+| **McAtamney (2024)**, notas para usar RULA, citadas por la auditoría de métodos | En el límite entre dos puntuaciones, la mayor; evaluar el lado más exigente | Criterio adoptado en RULA. **Documento pendiente de verificar** |
+| **Aghazadeh y Xiong**, KAIST ([SSRN 6035502](https://ssrn.com/abstract=6035502), preprint sin revisión por pares) | Error de MediaPipe y concordancia de REBA y RULA según la vista de la cámara | Recomendaciones de grabación y margen de medida provisional |
+| **MediaPipe Pose Landmarker** (Google) | Modelos `full` y `heavy` | Estimación de la pose |
+
+Las pruebas comparan el código con la copia de Ergonautas, no con el INSST ni con los originales. Un error que tenga Ergonautas pasaría las pruebas. Antes de cualquier uso fuera de la investigación habría que contrastar las tablas celda a celda con las publicaciones originales y con el INSST (ver [docs/LIMITACIONES.md](docs/LIMITACIONES.md)).
 
 ## Aviso legal y exención de responsabilidad
 
@@ -169,7 +185,7 @@ Quien use el software, o sus resultados, lo hace **por su cuenta y riesgo** y as
 
 ### 7. Terceros
 
-El software usa componentes y datos de terceros (entre otros, MediaPipe de Google y las tablas de los métodos tomadas de [Ergonautas](https://www.ergonautas.upv.es/), UPV), sujetos a sus propias licencias y condiciones. Los autores no responden de esos componentes. OWAS, REBA y RULA son métodos publicados por sus autores; esta implementación no está avalada por ellos.
+El software usa componentes y datos de terceros (entre otros, MediaPipe de Google, las tablas de los métodos transcritas de [Ergonautas](https://www.ergonautas.upv.es/), UPV, y criterios del INSST; ver [Fuentes](#fuentes)), sujetos a sus propias licencias y condiciones. Los autores no responden de esos componentes. OWAS, REBA y RULA son métodos publicados por sus autores; esta implementación no está avalada por ellos.
 
 ### 8. Sin relación profesional
 
