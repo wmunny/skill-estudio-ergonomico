@@ -570,6 +570,13 @@ def _inline(t: str, base: Path, incrustar: bool) -> str:
 
 
 def a_html(md: str, base: Path, titulo: str = "Estudio OWAS", incrustar: bool = True) -> str:
+    return (f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" '
+            f'content="width=device-width,initial-scale=1"><title>{html.escape(titulo)}</title><style>{CSS}</style></head>'
+            f'<body>{md_a_html(md, base, incrustar)}</body></html>')
+
+
+def md_a_html(md: str, base: Path, incrustar: bool = True) -> str:
+    """Contenido HTML (sin documento) del Markdown restringido de los informes."""
     out, lista, tabla = [], False, []
 
     def cerrar_tabla():
@@ -605,6 +612,4 @@ def a_html(md: str, base: Path, titulo: str = "Estudio OWAS", incrustar: bool = 
     cerrar_tabla()
     if lista:
         out.append("</ul>")
-    return (f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" '
-            f'content="width=device-width,initial-scale=1"><title>{html.escape(titulo)}</title><style>{CSS}</style></head>'
-            f'<body>{"".join(out)}</body></html>')
+    return "".join(out)

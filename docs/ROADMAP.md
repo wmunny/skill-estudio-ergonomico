@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado a 06/11/2026: skill funcional (OWAS, REBA y RULA), auditada documentalmente, con revisión visual y 1.274 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
+Estado a 06/11/2026: skill funcional (OWAS, REBA y RULA), auditada documentalmente, con revisión visual, informe ergonómico del puesto y 1.298 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
 
 ## Hecho (06/11/2026): revisión visual y contexto de la tarea
 
@@ -11,6 +11,20 @@ confirmación de la profundidad); el usuario confirma el contexto; el informe di
 sin y con revisión. Sentado o de pie cierran las piernas que no se ven. Primera prueba: MTR-juguetes (REBA de 2–15 a
 4–7; OWAS de 0 % a 97 % de observaciones codificadas). Pendiente: consenso entre varias revisiones y validarlo con
 vídeos anotados.
+
+## Hecho (06/11/2026): informe ergonómico del puesto
+
+Flujo en dos fases: en el chat, `validar` dice para qué métodos sirve el vídeo y el usuario decide; después, el informe
+es para la dirección: problemas ergonómicos detectados por reglas en código (zona, % del tiempo, veces por minuto,
+fases, gravedad, respaldo de OWAS/REBA/RULA), mapa corporal, línea de tiempo, capturas anotadas y plan de medidas
+(catálogo en código que Claude concreta al puesto en `adaptacion.json`). Lo técnico, en una pestaña aparte.
+
+## Siguiente mejora del informe: posturas que la revisión ve y la cámara no mide
+
+En MTR-juguetes la revisión visual ve que la mano derecha sube a la altura del hombro al coger el atornillador, pero el
+codo queda tapado y el código no lo cuenta. Propuesta: que `revision.json` admita posturas observadas por tramo
+(zona, lado, postura por categorías, confianza), como ya hace con las muñecas, y que entren como hallazgos marcados
+«estimado en la revisión visual».
 
 ## Próximo: varias tomas no simultáneas del mismo puesto (paso 1)
 

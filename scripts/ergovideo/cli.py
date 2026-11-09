@@ -11,7 +11,9 @@ from pathlib import Path
 
 import numpy as np
 
-from . import ergo, grabacion, informe, medidas, muestreo, pose, revision, visual
+from datetime import datetime
+
+from . import ergo, grabacion, hallazgos, informe, informe_puesto, medidas, muestreo, pose, revision, visual
 from .config import MEDIDAS, Config
 from .reglas import CONVENCIONES
 from .tablas import CONVENCION_CARGA_OWAS, codigo_carga
@@ -210,11 +212,11 @@ def revisar(args) -> int:
     return 0
 
 
-def analizar(args) -> int:
+def _cargar(args) -> dict | int:
+    """Vídeos, poses (MediaPipe, con caché) y revisiones. Devuelve un código de error si algo falla."""
     salida = Path(args.salida)
     salida.mkdir(parents=True, exist_ok=True)
     (salida / "capturas").mkdir(exist_ok=True)
-
     videos = [Path(v) for v in args.video]
     nombres = [v.name for v in videos]
     if len(set(nombres)) != len(nombres):
@@ -225,7 +227,6 @@ def analizar(args) -> int:
         return 2
     modo = args.modo if len(videos) > 1 else "combinar"
     metodos = [m.strip().lower() for m in args.metodos.split(",")]
-
     poses = []
     for v in videos:
         print(f"MediaPipe: {v.name}…", file=sys.stderr)
@@ -234,8 +235,6 @@ def analizar(args) -> int:
             print(f"No se detecta ninguna persona en {v.name}.", file=sys.stderr)
             return 3
         poses.append(p)
-
-    # Revisión visual (opcional): un revision.json por vídeo, o uno para todos.
     revs = [None] * len(videos)
     if args.revision:
         if len(args.revision) not in (1, len(videos)):
@@ -247,6 +246,55 @@ def analizar(args) -> int:
         except revision.RevisionInvalida as e:
             print(str(e), file=sys.stderr)
             return 2
+    return dict(salida=salida, videos=videos, nombres=nombres, desfases=desfases, modo=modo, metodos=metodos,
+                poses=poses, revs=revs)
+
+
+APTO = {"verde": "sí", "ambar": "con reservas", "rojo": "no recomendable"}
+
+
+def validar(args) -> int:
+    """Fase 1 (en el chat): ¿para qué métodos sirve el vídeo? Sin informe."""
+    c = _cargar(args)
+    if isinstance(c, int):
+        return c
+    ev = evaluar(c["poses"], c["nombres"], c["desfases"], args, c["metodos"], c["modo"], c["revs"])
+    cfg = ev["cfg"]
+    diags = [grabacion.diagnostico(p, f["res"], cfg.filtros.visibilidad) for p, f in zip(c["poses"], ev["fuentes"])]
+    out = dict(videos=[dict(video=d["video"], duracion_s=round(d["duracion_s"], 1), resolucion=f"{d['ancho']}x{d['alto']}",
+                            persona_detectada=round(d["deteccion"]), de_frente=round(d["vista_frontal"]),
+                            a_45=round(d["vista_45"]), de_perfil=round(d["vista_lateral"]), de_espaldas=round(d["de_espaldas"]))
+                       for d in diags], metodos={})
+    if "owas" in c["metodos"] and ev["resumen"]:
+        nv, mot = informe._nivel_owas(ev["resumen"])
+        out["metodos"]["OWAS"] = dict(apto=APTO[nv], motivos=mot + ev["resumen"]["avisos"][:2])
+    for n, d in ev["ergos"].items():
+        if "reba" in d:
+            out["metodos"].setdefault("REBA", {})[n] = dict(apto=APTO[d["reba_val"]["nivel"]], motivos=d["reba_val"]["motivos"])
+        if "rula" in d:
+            for s_ in "ID":
+                out["metodos"].setdefault(f"RULA {'izq.' if s_ == 'I' else 'dch.'}", {})[n] = dict(
+                    apto=APTO[d["rula_val"][s_]["nivel"]], motivos=d["rula_val"][s_]["motivos"])
+    out["como_mejorar"] = [x for d in diags for x in d["consejos"]]
+    out["datos_desconocidos"] = ev["tarea"].no_declarados()
+    out["estimado_por_ia_sin_confirmar"] = [k for k, v in ev["origenes"].items() if v == "estimado por IA"]
+    print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
+    return 0
+
+
+def informe_cmd(args) -> int:
+    """Vuelve a generar informe.html (p. ej. tras escribir adaptacion.json) sin repetir el análisis."""
+    ruta = informe_puesto.escribir(Path(args.salida), Path(args.adaptacion) if args.adaptacion else None)
+    print(json.dumps(dict(informe=str(ruta)), ensure_ascii=False))
+    return 0
+
+
+def analizar(args) -> int:
+    c = _cargar(args)
+    if isinstance(c, int):
+        return c
+    salida, videos, nombres, desfases = c["salida"], c["videos"], c["nombres"], c["desfases"]
+    modo, metodos, poses, revs = c["modo"], c["metodos"], c["poses"], c["revs"]
 
     print("Evaluación…", file=sys.stderr)
     ev = evaluar(poses, nombres, desfases, args, metodos, modo, revs)
@@ -351,8 +399,36 @@ def analizar(args) -> int:
                args=dict(carga_texto=carga_texto, turno_h=args.turno_h, modo_texto=modo_texto, modo=modo,
                          postura_base=args.postura_base, angulos=args.angulos))
     md = informe.markdown(ctx)
-    (salida / "informe.md").write_text(md, encoding="utf-8")
-    (salida / "informe.html").write_text(informe.a_html(md, salida), encoding="utf-8")
+    (salida / "informe_tecnico.md").write_text(md, encoding="utf-8")
+    for viejo in ("informe.md",):
+        (salida / viejo).unlink(missing_ok=True)
+
+    # Informe ergonómico del puesto: hallazgos (reglas en código), indicadores y plan de medidas.
+    hall = []
+    for p, f, rev in zip(poses, fuentes, revs):
+        for h in hallazgos.detectar(f["res"], tarea, rev, f["nombre"]):
+            ruta = salida / "capturas" / f"hallazgo_{visual._seguro(f['nombre'])}_{h['id']}.jpg"
+            visual.captura_anotada(p, f["res"], h["indice"], h["punto"], h["etiqueta"], ruta, cfg.filtros.visibilidad,
+                                   not args.sin_difuminar)
+            h["captura"] = str(ruta.relative_to(salida)).replace("\\", "/")
+            hall.append(h)
+    # Un mismo hallazgo en varias tomas: se queda el más grave.
+    unicos = {}
+    for h in hallazgos.ordenar(hall):
+        unicos.setdefault(h["id"], h)
+    hall = hallazgos.ordenar(list(unicos.values()) + hallazgos.condiciones(tarea)
+                             + (hallazgos.owas_frecuencia(resumen) if "owas" in metodos else []))
+    inds = hallazgos.indicadores(ergos, resumen, metodos)
+    urg = max([i["urgencia"] for i in inds] + [0])
+    rev0 = next((r for r in revs if r), None)
+    datos_inf = dict(
+        tarea=(rev0 or {}).get("contexto", {}).get("tarea") or None, fecha=datetime.now().strftime("%d/%m/%Y"),
+        video_txt=", ".join(f"{n} ({p.duracion:.0f} s)" for n, p in zip(nombres, poses)), metodos=metodos,
+        indicadores=inds, urgencia_global=urg, hallazgos=hall, plan=hallazgos.plan(hall, urg),
+        series={n: hallazgos.serie_riesgo(d["serie"]) for n, d in ergos.items()},
+        fases={n: (r or {}).get("fases", []) for n, r in zip(nombres, revs)})
+    (salida / "informe_datos.json").write_text(json.dumps(datos_inf, ensure_ascii=False, indent=2, default=_json), encoding="utf-8")
+    informe_puesto.escribir(salida)
 
     datos = dict(aviso="Demostración no validada", convenciones=dict(CONVENCIONES, carga_owas=CONVENCION_CARGA_OWAS),
                  videos=diags, resumen=resumen, capturas=capturas, videos_esqueleto=videos_out, reba_rula=ergo_ctx,
@@ -386,6 +462,11 @@ def analizar(args) -> int:
         rula={n: dict({s: corto_pico(d["rula"][s], d["rula_val"][s]) for s in "ID"}, peor_lado=d["rula_lado"])
               for n, d in ergos.items() if "rula" in d},
         avisos=resumen["avisos"], consejos=[c for d in diags for c in d["consejos"]],
+        hallazgos=[dict(id=h["id"], titulo=h["titulo"], gravedad=h["gravedad"],
+                        porcentaje=None if h.get("porcentaje") is None else round(h["porcentaje"]),
+                        fases=h.get("fases", [])) for h in hall],
+        urgencia=hallazgos.URGENCIAS[urg],
+        adaptacion=str(salida / "adaptacion.json"),
         no_declarados=tarea.no_declarados(),
         estimado_por_ia=[k for k, v in ev["origenes"].items() if v == "estimado por IA"],
         comparativa={k: dict(sin_revision=a[0], con_revision=b[0]) for k, a, b in comparativa} if comparativa else None)
@@ -410,6 +491,11 @@ def main(argv=None) -> int:
     r.add_argument("--fps-analisis", type=float, default=10.0)
     r.add_argument("--modelo", choices=["full", "heavy"], default="full")
     r.set_defaults(func=revisar)
+
+    i = sub.add_parser("informe", help="Vuelve a generar informe.html (p. ej. con adaptacion.json)")
+    i.add_argument("--salida", required=True)
+    i.add_argument("--adaptacion", default=None, help="Por defecto, <salida>/adaptacion.json si existe")
+    i.set_defaults(func=informe_cmd)
 
     b = sub.add_parser("analizar", help="Estudio OWAS, REBA y RULA")
     b.add_argument("--revision", action="append", default=None,
@@ -448,6 +534,14 @@ def main(argv=None) -> int:
     b.add_argument("--sin-video", action="store_true", help="No generar el vídeo con el esqueleto")
     b.add_argument("--sin-difuminar", action="store_true", help="No difuminar la cara (solo con consentimiento)")
     b.set_defaults(func=analizar)
+
+    # validar: mismos argumentos que analizar, sin informe
+    v = sub.add_parser("validar", help="¿Para qué métodos sirve el vídeo? (fase 1, sin informe)", parents=[], add_help=True)
+    for accion in b._actions:
+        if accion.dest in ("help",):
+            continue
+        v._add_action(accion)
+    v.set_defaults(func=validar)
 
     args = ap.parse_args(argv)
     return args.func(args)

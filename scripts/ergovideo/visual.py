@@ -168,6 +168,36 @@ def captura_lineas(pose, res: dict, k: int, lineas: list[str], cat: int | None, 
     return ruta
 
 
+def captura_anotada(pose, res: dict, k: int, puntos: tuple, etiqueta: str, ruta: Path, vis_min: float,
+                    difuminar: bool = True, ancho: int = 960) -> Path:
+    """Fotograma con el esqueleto, la zona del problema resaltada y su medida al lado (sin rótulos técnicos)."""
+    cap = cv2.VideoCapture(pose.video)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, int(pose.frames[k]))
+    ok, img = cap.read()
+    cap.release()
+    if not ok:
+        img = np.zeros((pose.height, pose.width, 3), np.uint8)
+    dibujar(img, pose.lm[k], res["usable"][k], res["invalidos"][k] != "", vis_min, difuminar)
+    h, w = img.shape[:2]
+    lm = pose.lm[k]
+    pts = [(lm[i, 0] * w, lm[i, 1] * h) for i in (puntos or ()) if not np.isnan(lm[i, 0])]
+    if pts:
+        cx, cy = (int(np.mean([p[0] for p in pts])), int(np.mean([p[1] for p in pts])))
+        r = max(18, w // 40)
+        cv2.circle(img, (cx, cy), r, (40, 60, 220), max(3, w // 300), cv2.LINE_AA)
+        if etiqueta:
+            esc = max(0.7, w / 1100)
+            (tw, th), _ = cv2.getTextSize(etiqueta, cv2.FONT_HERSHEY_SIMPLEX, esc, 2)
+            x = min(max(10, cx + r + 8), w - tw - 14)
+            y = max(th + 14, cy - r)
+            cv2.rectangle(img, (x - 6, y - th - 8), (x + tw + 6, y + 8), (40, 60, 220), -1)
+            cv2.putText(img, etiqueta, (x, y), cv2.FONT_HERSHEY_SIMPLEX, esc, (255, 255, 255), 2, cv2.LINE_AA)
+    if img.shape[1] > ancho:
+        img = cv2.resize(img, (ancho, int(img.shape[0] * ancho / img.shape[1])))
+    cv2.imwrite(str(ruta), img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return ruta
+
+
 # ---------------------------------------------------------------- gráficos
 
 def graficos(obs: list[dict], resumen: dict, fuentes: list[dict], dir_salida: Path, umbrales) -> dict:
