@@ -2,7 +2,9 @@
 
 Demostración de lo que un asistente de IA (Claude) puede hacer con una skill y librerías abiertas: a partir de **uno o varios vídeos de un puesto de trabajo**, evalúa la carga postural con **OWAS**, **REBA** y **RULA** usando **MediaPipe Pose**. Antes de puntuar comprueba, método a método, si el vídeo sirve. Después entrega un informe con las puntuaciones, las capturas de las peores posturas y recomendaciones de grabación.
 
-> **Aviso.** Resultados **no validados** frente a la observación de un ergónomo. No sustituyen a una evaluación de riesgos ni al criterio de un técnico de prevención. Ver [docs/LIMITACIONES.md](docs/LIMITACIONES.md).
+> [!CAUTION]
+> **Solo para investigación. Se desaconseja totalmente su uso profesional.**
+> Esta herramienta **no está validada**. Faltan ensayos con ergónomos validadores que fijen sus capacidades y sus limitaciones. Sus resultados **no son una evaluación de riesgos** ni sirven para tomar decisiones sobre trabajadores o puestos reales. Los autores **no responden** de ningún uso distinto de la investigación. Lee el [aviso legal](#aviso-legal-y-exención-de-responsabilidad) antes de usarla.
 
 Nace de las lecciones de la PoC [postura-poc](https://github.com/wmunny/postura-poc). MediaPipe mide, pero se inventa las articulaciones ocultas. Las reglas mecánicas detectan lo imposible. El % de tiempo de OWAS necesita grabaciones largas. Hay que elegir 2D o 3D según la orientación de la cámara y calcular con el lado visible. Las puntuaciones se calculan siempre en código, nunca con un modelo de lenguaje.
 
@@ -113,9 +115,66 @@ Resumen de Aghazadeh y Xiong (KAIST, [SSRN 6035502](https://ssrn.com/abstract=60
 .venv\Scripts\python -m pytest -q
 ```
 
-1.254 pruebas:
+1.299 pruebas:
 
 - **Tablas:** las 904 celdas de OWAS, REBA y RULA frente a una copia extraída de Ergonautas (`tests/fixtures`), no frente al propio código.
 - **Fronteras:** cada umbral en a − ε, a y a + ε con el valor esperado escrito a mano.
 - **OWAS:** posturas sintéticas de frente, a 45° y de perfil; datos que faltan (nunca favorables); margen; filtros, muestreo y elección de cámara.
 - **REBA y RULA:** celdas de las tablas A, B y C y niveles. Posturas sintéticas calculadas a mano en tres vistas: neutra, exigente con carga, brazo abducido, extensiones, antebrazo cruzando la línea media y muñeca. También rangos cuando falta un dato, datos declarados, carga de RULA, peor postura sostenida frente a un fotograma erróneo y validez con un brazo tapado.
+
+## Aviso legal y exención de responsabilidad
+
+**Léelo entero antes de usar la herramienta.** Usar, copiar, instalar o ejecutar este software, o sus resultados, supone aceptar estas condiciones. Si no las aceptas, no lo uses.
+
+### 1. Finalidad: solo investigación
+
+Este software es un **prototipo experimental de investigación**. Sirve para explorar qué puede hacer un asistente de IA con estimación de pose y métodos de carga postural. Su único uso permitido es la **investigación y la experimentación** (estudios piloto, comparación de métodos, docencia, pruebas técnicas), con datos y personas que participen sabiéndolo.
+
+### 2. No validado
+
+La herramienta **no ha sido validada**. Para validarla hacen falta ensayos controlados en los que **ergónomos validadores** comparen sus resultados con evaluaciones hechas por expertos. Esos ensayos todavía no se han hecho. Hasta entonces no se conocen con rigor su exactitud, su fiabilidad, sus capacidades ni sus limitaciones.
+
+Hay errores conocidos que pueden cambiar el resultado. MediaPipe estima mal las articulaciones tapadas y puede inventarlas. Los ángulos medidos en vídeo tienen un error de varios grados que depende de la cámara. Algunos datos que piden los métodos no se ven en la imagen. El modelo de IA que guía la skill puede equivocarse al revisar el vídeo o al redactar el informe. Ver [docs/LIMITACIONES.md](docs/LIMITACIONES.md).
+
+### 3. Uso profesional desaconsejado
+
+**Se desaconseja totalmente su uso profesional.** En particular, **no debe usarse** para:
+
+- hacer, sustituir o completar una **evaluación de riesgos laborales**, ni la de un puesto concreto;
+- cumplir obligaciones legales de prevención de riesgos laborales (en España, la Ley 31/1995 de Prevención de Riesgos Laborales y el Real Decreto 39/1997, Reglamento de los Servicios de Prevención, o su equivalente en otros países);
+- tomar decisiones sobre trabajadores concretos: aptitud, vigilancia de la salud, asignación de tareas, retribución, disciplina o despido;
+- diagnósticos, valoraciones médicas, periciales, informes para inspección, juzgados, mutuas o aseguradoras;
+- diseñar o aprobar puestos, equipos o medidas preventivas sin la revisión de un técnico competente.
+
+La evaluación de riesgos ergonómicos corresponde a **técnicos de prevención cualificados**, que observan el puesto en persona y aplican su criterio profesional. Ningún resultado de esta herramienta sustituye ese criterio. Las puntuaciones, los «problemas identificados» y las «medidas preventivas» del informe son **ejemplos generados automáticamente**, no recomendaciones profesionales.
+
+### 4. Sin garantías
+
+El software y sus resultados se ofrecen **«tal cual» (*as is*) y «según disponibilidad»**, **sin garantía de ningún tipo**, expresa o implícita. Esto incluye, entre otras, las garantías de exactitud, fiabilidad, integridad, actualidad, idoneidad para un fin concreto, comerciabilidad, cumplimiento normativo y no infracción de derechos de terceros. Nada garantiza que funcione sin errores ni que sus resultados coincidan con los de un ergónomo.
+
+### 5. Limitación de responsabilidad
+
+**En la máxima medida que permita la ley aplicable**, los autores, colaboradores y las entidades a las que pertenezcan **no serán responsables** de ningún daño o perjuicio, directo o indirecto, incidental, especial, consecuente o punitivo, que derive de usar o de no poder usar el software o sus resultados, ni de confiar en ellos. Esto incluye, entre otros, lesiones o daños a la salud de trabajadores, accidentes, enfermedades profesionales, sanciones administrativas, reclamaciones de terceros, decisiones laborales, pérdida de datos, lucro cesante o daño reputacional. La exclusión se aplica sea cual sea el fundamento de la reclamación (contrato, responsabilidad extracontractual, negligencia u otro) y aunque se hubiera advertido de la posibilidad del daño.
+
+Esta cláusula no excluye la responsabilidad que, por ley, no pueda excluirse (por ejemplo, la derivada de dolo o culpa grave).
+
+### 6. Responsabilidad de quien la usa
+
+Quien use el software, o sus resultados, lo hace **por su cuenta y riesgo** y asume toda la responsabilidad de ese uso, incluido cualquier uso profesional en contra de este aviso. En particular, quien la use es responsable de:
+
+- comprobar cualquier resultado con un técnico de prevención cualificado antes de darle cualquier uso;
+- informar a las personas que aparezcan en los vídeos y obtener su consentimiento o la base jurídica que corresponda, y cumplir la normativa de protección de datos (RGPD y LOPDGDD en España). Los vídeos de trabajadores son datos personales y pueden contener datos de salud. **Quien graba y analiza es el responsable del tratamiento**, no los autores de este software, que no reciben ni tratan esos datos;
+- cumplir la normativa laboral, la de prevención, la de inteligencia artificial que le sea aplicable y los derechos de representación de los trabajadores;
+- dejar a los autores libres de cualquier reclamación de terceros que derive de su uso.
+
+### 7. Terceros
+
+El software usa componentes y datos de terceros (entre otros, MediaPipe de Google y las tablas de los métodos tomadas de [Ergonautas](https://www.ergonautas.upv.es/), UPV), sujetos a sus propias licencias y condiciones. Los autores no responden de esos componentes. OWAS, REBA y RULA son métodos publicados por sus autores; esta implementación no está avalada por ellos.
+
+### 8. Sin relación profesional
+
+Ni el software ni su documentación constituyen asesoramiento profesional en ergonomía, prevención de riesgos laborales, medicina del trabajo ni derecho. Usarlo no crea ninguna relación profesional, contractual ni de servicio con los autores.
+
+### Disclaimer (English summary)
+
+**Research use only. Professional use is strongly discouraged.** This software is an unvalidated experimental prototype; its capabilities and limitations have not been established through trials with expert ergonomist validators. It is not a risk assessment tool and must not be used to make or replace occupational risk assessments, or to make decisions about real workers or workplaces. It is provided "AS IS", without warranty of any kind. To the maximum extent permitted by applicable law, the authors and contributors accept no liability for any damage arising from its use or from reliance on its results. Users act at their own risk and are solely responsible for any use, including compliance with data protection law for any video they process. The Spanish text above prevails.
