@@ -1,4 +1,4 @@
-r"""Genera el informe de revisión de los métodos OWAS, REBA y RULA a partir del propio código.
+r"""Genera el informe de revisión de los métodos OWAS, REBA, RULA y OCRA a partir del propio código.
 
 Las tablas se construyen celda a celda llamando a las mismas funciones que puntúan, y las comprobaciones de
 umbral pasan valores de ángulo por las reglas reales. Así el revisor ve lo que se ejecuta, no una descripción.
@@ -172,9 +172,103 @@ def s_(conj) -> str:
 ESTADO_P = {"resuelto": "Resuelto", "pendiente": "Pendiente del experto", "provisional": "Provisional"}
 
 
+def seccion_ocra(d: Doc) -> None:
+    """OCRA: tablas y reglas tal como las ejecuta el código (tablas_ocra.py, ocra.py, ocra_at.py)."""
+    from ergovideo import ocra as O
+    from ergovideo import ocra_at as AT
+    from ergovideo import tablas_ocra as TO
+    d.h(2, "OCRA (movimientos repetitivos, ISO 11228-3)", "ocra")
+    d.nota("**Aviso normativo.** " + TO.AVISO_NORMATIVO + " Todas las constantes están en `scripts/ergovideo/tablas_ocra.py` "
+           "con su fuente y la marca `verificar_iso_2026`. La herramienta no afirma conformidad con la edición de 2026.")
+    d.p("Por mano: ATA = Σ frecuencia_j × minutos_j; RTA = Σ (30 × FoM_j × PoM_j × ReM_j × AdM_j × minutos_j) × RcM × DuM; "
+        "índice = ATA / RTA. Admite varias tareas repetitivas en el turno. Cada dato puede ser puntual, un rango o "
+        "desconocido (se recorre entero); el índice se da como rango [ATA mín / RTA máx, ATA máx / RTA mín].")
+    d.h(3, "Multiplicador de fuerza (FoM, Borg CR-10)")
+    d.tabla(["Borg", "FoM"], [[g(b), g(f)] for b, f in TO.FOM_BORG],
+            pie="Borg ≤ 0,5 → 1; ≥ 5 → 0,01. Sin interpolar: entre escalones se usa el superior (FoM más bajo) y el "
+                "inferior va a la sensibilidad. Borg medio ponderado por la duración de cada fase.")
+    d.h(3, "Multiplicador de postura (PoM)")
+    d.tabla(["Fracción del ciclo en postura forzada ≥", "PoM"], [[f"{100 * a:.0f} %", g(v)] for a, v in TO.POM_FRACCION],
+            pie="Por hombro, codo, muñeca y agarre; se toma el más bajo. La estereotipia no entra aquí (va en ReM).")
+    P = TO.POSTURA_FORZADA
+    d.tabla(["Articulación", "Postura forzada medida con MediaPipe"], [
+        ["Hombro", f"flexión ≥ {g(P['hombro_flexion'])}° o abducción ≥ {g(P['hombro_abduccion'])}°"],
+        ["Codo", f"flexión ≥ {g(P['codo_flexion'])}° (aproximación propia; la pronosupinación no se mide)"],
+        ["Muñeca", f"flexión o extensión ≥ {g(P['muneca_flexion'])}° (estimada con tres puntos de la mano; poco fiable)"],
+        ["Agarre", "no se mide: revisión visual o declarado"]],
+        pie="Fracción con el margen de medida: mínima (forzada aun restando el margen) y máxima (sumándolo); lo no medido "
+            "cuenta 0 en el mínimo y 1 en el máximo. Con menos del 50 % medido, la articulación queda desconocida.")
+    d.h(3, "Repetitividad (ReM), factores adicionales (AdM), recuperación (RcM) y duración (DuM)")
+    d.p(f"**ReM** = {g(TO.REM_VALOR)} si el ciclo dura menos de {g(TO.REM_CICLO_S)} s o la misma acción ocupa más del "
+        f"{100 * TO.REM_MISMA_ACCION:.0f} % del ciclo; si no, 1.")
+    d.tabla(["Fracción del ciclo con el factor ≥", "AdM"], [[f"{100 * a:.0f} %", g(v)] for a, v in TO.ADM_FRACCION],
+            pie="Factores: " + "; ".join(TO.FACTORES_ADICIONALES.values()) + ". Con varios, el más bajo.")
+    d.tabla(["Horas sin recuperación adecuada", "RcM"], [[str(h), g(v)] for h, v in TO.RCM_HORAS.items()],
+            pie=f"Desde el horario: proporción trabajo/recuperación {g(TO.PROPORCION_TRABAJO_RECUPERACION)}:1 (una pausa "
+                f"de R min cubre hasta 5·R min de la hora anterior); la comida y el final del turno cubren la hora previa; "
+                f"una pausa de menos de {g(TO.RECUPERACION_MINIMA_MIN)} min no cuenta. Horas no enteras → rango entre "
+                "los dos escalones (nominal: el más cercano).")
+    d.tabla(["Minutos netos repetitivos", "DuM"],
+            [["< 120", "2"], ["120–239", "1,5"], ["240–480", "1"], ["> 480", g(TO.DUM_MAS)]])
+    d.h(3, "Clasificación")
+    for k, c in TO.CLASIFICACIONES.items():
+        d.tabla(["Índice (redondeado a una décima) ≤", "Color", "Nivel", "Actuación"],
+                [["∞" if math.isinf(b[0]) else g(b[0]), b[1], b[2], b[3]] for b in c["bandas"]], pie=f"{c['nombre']} (`{k}`).")
+    d.h(3, "Comprobaciones de frontera (funciones reales)")
+    e = 1e-6
+    d.tabla(["Comprobación", "a − ε", "a", "a + ε"], [
+        ["FoM, Borg a = 1", g(TO.fom(1 - e)["nominal"]), g(TO.fom(1)["nominal"]), g(TO.fom(1 + e)["nominal"])],
+        ["PoM, fracción a = 1/3", g(TO.pom_articulacion(1 / 3 - e)), g(TO.pom_articulacion(1 / 3)), g(TO.pom_articulacion(1 / 3 + e))],
+        ["ReM, ciclo a = 15 s", g(TO.rem(15 - e, None)), g(TO.rem(15, None)), g(TO.rem(15 + e, None))],
+        ["AdM, fracción a = 51 %", g(TO.adm_factor(0.51 - e)), g(TO.adm_factor(0.51)), g(TO.adm_factor(0.51 + e))],
+        ["DuM, a = 120 min", g(TO.dum(120 - e)), g(TO.dum(120)), g(TO.dum(120 + e))],
+        ["DuM, a = 480 min", g(TO.dum(480 - e)), g(TO.dum(480)), g(TO.dum(480 + e))],
+        ["ISO 2007, índice a = 3,5", TO.clasificar(3.5 - e)["color"], TO.clasificar(3.5)["color"],
+         TO.clasificar(3.55)["color"] + " (3,55)"],
+    ])
+    d.h(3, "Recuento de acciones técnicas (ficha de la revisión visual)")
+    d.tabla(["Gesto", "AT", "Regla aplicada en código"],
+            [[k.replace("_", " "), str(v[0]) + (" × repeticiones" if v[2] == "repeticiones" else ""), v[1]]
+             for k, v in AT.GESTOS.items()],
+            pie="Claude propone; el código cuenta. Se rechaza lo que la regla no admite; las entradas de confianza baja o "
+                "sin el dato de la regla (distancia, esfuerzo) quedan dudosas y solo cuentan en el máximo del rango.")
+    mtr = {"tareas": [{"minutos": 400, "ciclo_s": 10, "manos": {
+        "dch": {"at_ciclo": 11, "fom": 0.85, "pom": 0.70, "rem": 0.70, "adm": 0.90},
+        "izq": {"at_ciclo": 8, "fom": 0.95, "pom": 0.80, "rem": 0.70, "adm": 0.90}}}], "rcm": 0.60, "dum": 1}
+    r = O.calcular(mtr)["manos"]
+    d.h(3, "Caso de regresión MTR-juguetes")
+    d.tabla(["Mano", "AT/ciclo", "Ciclo", "FoM", "PoM", "ReM", "AdM", "RcM", "DuM", "Min", "Índice"], [
+        ["derecha", "11", "10 s", "0,85", "0,70", "0,70", "0,90", "0,60", "1", "400", O.fmt(r["dch"]["indice"])],
+        ["izquierda", "8", "10 s", "0,95", "0,80", "0,70", "0,90", "0,60", "1", "400", O.fmt(r["izq"]["indice"])]],
+        pie="Esperado: 9,78 y 5,57 (tests/test_ocra.py). Con la ficha de 17/14 AT de otro análisis, el código rechaza "
+            "«devolver herramienta», «soltar», «alcanzar» y las sujeciones de la mano de apoyo, y deja 11/8.")
+    d.h(3, "Fuentes de cada constante")
+    d.tabla(["Constante", "Fuente", "verificar_iso_2026"],
+            [[k, v["fuente"], "sí" if v["verificar_iso_2026"] else "no"] for k, v in TO.FUENTES.items()])
+
+
+PUNTOS_OCRA = [
+    ["O1", "Conformidad con ISO 11228-3:2026", "Pendiente", "Tablas clásicas (2007 y Colombini); sin verificar frente a 2026"],
+    ["O2", "PoM: escalones por fracción y articulación (tabla C.2)", "Pendiente del experto",
+     "Confirmado PoM = 1 por debajo de 1/3; escalones 0,70 / 0,60 / 0,50 en 1/3, 2/3 y 90 %, iguales para todas"],
+    ["O3", "ReM: estereotipia", "Pendiente del experto",
+     "Criterio del encargo (ciclo < 15 s o > 50 % → 0,70); otras versiones gradúan 0,85 / 0,70"],
+    ["O4", "AdM: bandas por fracción del ciclo", "Pendiente del experto", "25 % → 0,95; 51 % → 0,90; 80 % → 0,80"],
+    ["O5", "DuM", "Pendiente del experto", "4 tramos (< 120, 120–239, 240–480, > 480 min); hay versiones con más tramos"],
+    ["O6", "RcM desde el horario", "Provisional", "Proporción 5:1; pausa mínima 8 min; comida y fin del turno cubren la hora previa"],
+    ["O7", "FoM entre escalones", "Resuelto (convención)", "Escalón conservador; el otro, en la sensibilidad; interpolar es configurable"],
+    ["O8", "Posturas forzadas medidas con MediaPipe", "Pendiente de validación",
+     "Hombro 80°/45°, codo 100° (propio), muñeca 45°; pronosupinación y desviación no se miden"],
+    ["O9", "Bandas de clasificación", "Resuelto (convención)", "Sobre el índice redondeado a una décima"],
+    ["O10", "Reglas de recuento de AT", "Pendiente de validación", "Validar con fichas de expertos sobre los mismos vídeos"],
+    ["O11", "Ciclo por periodicidad y candidatos a AT", "Heurística propia",
+     "Autocorrelación ≥ 0,3; paradas y cambios de velocidad de la muñeca"],
+]
+
+
 def construir() -> Doc:
     d = Doc()
-    d.h(1, "Revisión de OWAS, REBA y RULA")
+    d.h(1, "Revisión de OWAS, REBA, RULA y OCRA")
     d.p(f"Skill *estudio-ergonomico-video* · documento generado el {date.today():%d/%m/%Y} a partir del código "
         "(`scripts/informe_revision.py`). Versión 2: incorpora la auditoría documental del 06/11/2026 y las decisiones "
         "del usuario sobre fronteras, carga, datos desconocidos y margen de medida.")
@@ -442,6 +536,8 @@ def construir() -> Doc:
         filas.append([nombre, r_(r["A"]), r_(r["B"]), r_(r["rango"]), r_(u_["C"]), r_(u_["D"]), r_(u_["rango"])])
     d.tabla(["Postura (lado izq. en RULA)", "REBA A", "REBA B", "REBA", "RULA C", "RULA D", "RULA"], filas)
 
+    seccion_ocra(d)
+
     # 6 Validación --------------------------------------------------------
     d.h(2, "Estado del resultado y validez técnica", "validacion")
     d.p("Los colores miden cobertura y certeza del cálculo con convenciones provisionales, no la exactitud de la medida "
@@ -455,6 +551,10 @@ def construir() -> Doc:
         ["OWAS", "Observaciones con código nominal conocido", f"≥ {g(M.cobertura[0])} %", f"≥ {g(M.cobertura[1])} %", "menos"],
         ["OWAS", "Intervalo aproximado del % de tiempo", f"≤ ±{g(M.margen_objetivo)}", f"≤ ±{g(2 * M.margen_objetivo)}", "más"],
         ["OWAS", "Duración", "≥ 20 min", "< 20 min", "—"],
+        ["OCRA", "Ciclos completos en el vídeo", "≥ 3", "2–3 o ciclo sin determinar", "< 2"],
+        ["OCRA", "Fotogramas por segundo", "≥ 25", "15–25", "< 15"],
+        ["OCRA", "Mano más activa", "visible ≥ 70 % y del lado de la cámara", "lado lejano o menos visible",
+         "manos no visibles (revisión)"],
     ])
     d.p("**Peor postura (REBA, RULA):** sostenida (máximo de la puntuación mínima en ventanas de 0,5 s) y pico breve "
         "fiable (máximo en fotogramas sin valores interpolados, con su duración). Si el pico breve supera a la sostenida, "
@@ -494,6 +594,8 @@ def construir() -> Doc:
         ["P19", "Fronteras de RULA (notas de 2024)", "Pendiente de verificar el documento", "En la frontera, la mayor"],
         ["P20", "Márgenes de medida", "Provisional", "Sección 2.1; calibrar con vídeos anotados"],
     ])
+    d.p("**OCRA.**")
+    d.tabla(["Ref.", "Decisión", "Estado", "Valor actual"], PUNTOS_OCRA)
     d.p("**Validación propuesta:** vídeos reales independientes (personas y vídeos distintos para calibrar y para probar), "
         "con oclusiones y distintas cámaras, anotados por un ergónomo. Informar error angular, matriz de confusión por "
         "código OWAS, acuerdo por nivel de actuación y, sobre todo, las subestimaciones. Kappa sin ponderar para los "
@@ -510,6 +612,9 @@ def construir() -> Doc:
         "Aghazadeh y Xiong: preprint SSRN 6035502; la auditoría cita una versión publicada (DOI 10.1016/j.ergon.2026.104061), "
         "pendiente de verificar.",
         "Auditoría documental de OWAS, REBA y RULA, 06/11/2026.",
+        "Occhipinti (1998), OCRA, Ergonomics 41(9):1290-1311. Colombini, Occhipinti y Grieco (2002), *Risk assessment and "
+        "management of repetitive movements and exertions of upper limbs*. ISO 11228-3:2007, anexo C (sustituida por "
+        "ISO 11228-3:2026, publicada el 08/05/2026: no verificada). UNE-EN 1005-5:2007. INSST: movimientos repetitivos.",
     ])
     return d
 
@@ -579,7 +684,7 @@ def pagina(d: Doc) -> str:
     # El índice va justo después de la nota inicial.
     partes = cuerpo.split("</aside>", 1)
     cuerpo = partes[0] + "</aside>" + indice + partes[1] if len(partes) == 2 else indice + cuerpo
-    return (f'<title>Revisión OWAS REBA RULA</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'
+    return (f'<title>Revisión OWAS REBA RULA OCRA</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'
             f"{fuentes}\n<style>{CSS}</style>\n<main class=\"pagina\">\n{cuerpo}\n</main>\n")
 
 

@@ -1,0 +1,235 @@
+{
+ "_nota": "Fixture SINTÉTICO de regresión: reproduce el patrón del encargo (otro análisis contaba 17/14 AT; las válidas son 11/8). No es la observación del vídeo.",
+ "ciclo": {
+  "inicio": 10.0,
+  "fin": 20.0,
+  "evidencia": "alcance a la caja → alcance siguiente"
+ },
+ "acciones": [
+  {
+   "t": 10.5,
+   "mano": "dch",
+   "gesto": "coger",
+   "objeto": "cabina",
+   "confianza": "alta"
+  },
+  {
+   "t": 11.2,
+   "mano": "dch",
+   "gesto": "posicionar",
+   "objeto": "cabina",
+   "confianza": "alta"
+  },
+  {
+   "t": 12.6,
+   "mano": "dch",
+   "gesto": "coger",
+   "objeto": "pieza amarilla",
+   "confianza": "alta"
+  },
+  {
+   "t": 13.0,
+   "mano": "dch",
+   "gesto": "posicionar",
+   "objeto": "pieza amarilla",
+   "confianza": "alta"
+  },
+  {
+   "t": 15.3,
+   "mano": "dch",
+   "gesto": "coger_herramienta",
+   "objeto": "atornillador",
+   "confianza": "alta"
+  },
+  {
+   "t": 15.7,
+   "mano": "dch",
+   "gesto": "posicionar_herramienta",
+   "objeto": "atornillador",
+   "confianza": "alta"
+  },
+  {
+   "t": 16.0,
+   "mano": "dch",
+   "gesto": "accionar_herramienta",
+   "objeto": "atornillador",
+   "confianza": "alta"
+  },
+  {
+   "t": 17.5,
+   "mano": "dch",
+   "gesto": "coger",
+   "objeto": "volquete",
+   "confianza": "alta"
+  },
+  {
+   "t": 18.2,
+   "mano": "dch",
+   "gesto": "posicionar",
+   "objeto": "volquete",
+   "confianza": "alta"
+  },
+  {
+   "t": 19.4,
+   "mano": "dch",
+   "gesto": "coger",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 19.9,
+   "mano": "dch",
+   "gesto": "posicionar",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 10.2,
+   "mano": "dch",
+   "gesto": "alcanzar",
+   "objeto": "caja de cabinas",
+   "confianza": "alta",
+   "regla": "alcanzar = 1"
+  },
+  {
+   "t": 11.6,
+   "mano": "dch",
+   "gesto": "soltar",
+   "objeto": "cabina",
+   "confianza": "alta"
+  },
+  {
+   "t": 13.3,
+   "mano": "dch",
+   "gesto": "soltar",
+   "objeto": "pieza amarilla",
+   "confianza": "alta"
+  },
+  {
+   "t": 17.2,
+   "mano": "dch",
+   "gesto": "devolver_herramienta",
+   "objeto": "atornillador",
+   "confianza": "alta",
+   "regla": "devolver = 1"
+  },
+  {
+   "t": 18.6,
+   "mano": "dch",
+   "gesto": "soltar",
+   "objeto": "volquete",
+   "confianza": "alta"
+  },
+  {
+   "t": 14.8,
+   "mano": "dch",
+   "gesto": "alcanzar",
+   "objeto": "atornillador",
+   "confianza": "alta"
+  },
+  {
+   "t": 12.2,
+   "mano": "izq",
+   "gesto": "girar",
+   "objeto": "chasis",
+   "confianza": "alta"
+  },
+  {
+   "t": 14.3,
+   "mano": "izq",
+   "gesto": "girar",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 16.9,
+   "mano": "izq",
+   "gesto": "empujar",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 17.6,
+   "mano": "izq",
+   "gesto": "coger",
+   "objeto": "volquete",
+   "confianza": "alta"
+  },
+  {
+   "t": 18.2,
+   "mano": "izq",
+   "gesto": "posicionar",
+   "objeto": "volquete",
+   "confianza": "alta"
+  },
+  {
+   "t": 19.3,
+   "mano": "izq",
+   "gesto": "coger",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 19.6,
+   "mano": "izq",
+   "gesto": "girar",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 19.9,
+   "mano": "izq",
+   "gesto": "posicionar",
+   "objeto": "camión",
+   "confianza": "alta"
+  },
+  {
+   "t": 10.0,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  },
+  {
+   "t": 11.0,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  },
+  {
+   "t": 12.8,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  },
+  {
+   "t": 13.5,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  },
+  {
+   "t": 15.4,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  },
+  {
+   "t": 16.3,
+   "mano": "izq",
+   "gesto": "sujetar",
+   "objeto": "chasis",
+   "confianza": "alta",
+   "regla": "sujeción = 1"
+  }
+ ]
+}

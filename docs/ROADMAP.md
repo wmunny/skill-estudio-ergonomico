@@ -1,6 +1,18 @@
 # Roadmap
 
-Estado a 06/11/2026: skill funcional (OWAS, REBA y RULA), auditada documentalmente, con revisión visual, informe ergonómico del puesto y 1.298 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
+Estado a 16/11/2026: skill funcional (OWAS, REBA, RULA y OCRA), auditada documentalmente (OCRA aún no), con revisión visual, informe ergonómico del puesto y 1.462 pruebas. Demostración no validada. Siguiente fase: probarla con vídeos reales del usuario y recoger mejoras.
+
+## Hecho (16/11/2026): OCRA y dos caminos
+
+OCRA (índice por mano, tablas clásicas de ISO 11228-3:2007 y Colombini y Occhipinti) como cuarto método. Dos caminos: estudio completo (`--metodos todos`, una sola pasada de MediaPipe, informe integrado con un semáforo por método) o métodos concretos (`--metodos ocra`…). Ficha de acciones técnicas en la revisión visual, validada en código; RcM desde el horario real; varias tareas; sensibilidad; escenario proyectado desde `adaptacion.json`; orden `ocra` sin vídeo. MediaPipe opcional en OCRA: ciclo por periodicidad, fracciones de postura forzada y candidatos a AT. Caso MTR-juguetes: con la ficha de Claude, mano derecha 11–14 AT (índice 9,8–12,5), izquierda 3–6 AT (2,1–4,2), frente a las 11/8 del caso de referencia: la mano de apoyo es la más difícil de ver.
+
+Pendiente de OCRA (detalle en `docs/REVISION_METODOS.md`, O1–O11):
+
+- **O1: verificar todas las tablas frente a ISO 11228-3:2026** (publicada el 08/05/2026). Hasta entonces no se afirma conformidad.
+- O2–O5: escalones de PoM por articulación, estereotipia (ReM graduado o no), bandas de AdM y tramos de DuM.
+- O8: umbrales de postura forzada medidos con MediaPipe (el del codo es propio); pronosupinación y desviación de la muñeca con un modelo de manos.
+- O10: validar el recuento de AT con fichas de expertos sobre los mismos vídeos; consenso entre varias revisiones.
+- Varias tareas repetitivas a partir de varios vídeos (hoy los datos de cada tarea se declaran en `datos_ocra.json`).
 
 ## Hecho (06/11/2026): revisión visual y contexto de la tarea
 

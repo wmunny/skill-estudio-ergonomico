@@ -67,3 +67,42 @@ Cada veredicto lleva `motivo` y `evidencia` (qué ves en la imagen original que 
 1. Enseña al usuario el contexto propuesto (postura, apoyo, carga, agarre, actividad, rotaciones, muñecas) en lenguaje llano y pídele que confirme o corrija.
 2. Corrige el JSON con sus respuestas y pon en `contexto.confirmado` los campos confirmados (p. ej. `["postura_base", "apoyo_piernas", "carga_kg", "agarre", "actividad"]`).
 3. Analiza con `--revision <revision.json>`. El informe distingue lo declarado, lo confirmado, lo estimado por la IA y lo desconocido, y compara el resultado sin y con revisión.
+
+## 6. Ficha de acciones técnicas (OCRA, bloque `ocra`)
+
+Con `--metodos ocra` (o `todos`), `revisar` genera `ocra_ciclo_NN.jpg`: el ciclo representativo a 4–8 fotogramas por segundo, con el tiempo en cada fotograma y un punto naranja donde MediaPipe ve que la mano se para o cambia de velocidad (candidatos: orientan, no son AT). Mira **todas** las láminas del ciclo, en orden, y rellena el bloque `ocra`:
+
+| Campo | Valores | Criterio |
+|---|---|---|
+| `ciclo.inicio`, `ciclo.fin` | segundos | Un ciclo completo y representativo (p. ej., de un alcance a la caja al siguiente). Explica en `ciclo.evidencia` cómo lo has delimitado |
+| `manos_visibles` | `true`, `false`, `null` | ¿Se ven las manos y los objetos en las operaciones? Si no, OCRA queda «no recomendable» |
+| `acciones` | lista | Una entrada por gesto, **por mano** y por segundo (ver abajo) |
+| `posturas.dch/izq.agarre` | fracción del ciclo (0–1), `[mín, máx]` o `null` | Tiempo con agarre en pinza, en gancho o palmar forzado. `null` si no lo ves |
+| `confirmada` | `false` | Se pone a `true` solo cuando el usuario confirma el recuento |
+
+Cada acción: `t` (segundo de inicio), `mano` (`dch` o `izq`, del trabajador), `gesto`, `objeto`, `confianza` (`alta`, `media`, `baja`), `cuenta` (si propones contarla como AT; por defecto `true`) y, según el gesto, `repeticiones` (girar, accionar herramienta, golpear, pasadas), `distancia_m` (transportar), `con_esfuerzo_o_precision` (introducir, encajar, sacar) y `gesto_distinto` (introducir o encajar justo después de posicionar el mismo objeto). Añade `nota` si ayuda.
+
+Gestos y lo que hace el código (criterios OCRA de Colombini y Occhipinti, anexo de ISO 11228-3:2007, UNE-EN 1005-5 e INSST):
+
+| Gesto (`gesto`) | AT |
+|---|---|
+| `alcanzar` | 0: se valora en postura y forma parte de «coger» |
+| `coger`, `agarrar` | 1 |
+| `pasar_mano` | 1 por mano (anota una entrada en cada mano) |
+| `posicionar` | 1 |
+| `introducir`, `encajar`, `sacar` | 1 si hay esfuerzo o precisión; tras `posicionar` del mismo objeto, solo si es un gesto distinto |
+| `empujar`, `tirar`, `presionar` | 1 |
+| `girar` | 1 por giro |
+| `coger_herramienta`, `posicionar_herramienta` | 1 cada uno |
+| `accionar_herramienta` | 1 por accionamiento |
+| `devolver_herramienta` (suspendida, soltándola) | 0: es soltar |
+| `dejar_herramienta_soporte` (con precisión) | 1: es posicionar |
+| `soltar`, `abrir_mano` | 0 |
+| `transportar` | 0 a menos de 1 m; 1 a 1 m o más |
+| `sujetar` (mano de apoyo, estático) | 0: se valora en postura y agarre |
+| `control_visual`, `andar`, `esperar` | 0 |
+| `golpear`, `pasada` | 1 cada una |
+
+Anota también lo que **no** cuenta (con `cuenta: false`): así queda la trazabilidad. Si propones contar algo que la regla no admite, el código lo **rechaza** y lo dice. Las entradas de confianza **baja** o a las que les falta un dato de la regla quedan **dudosas**: cuentan solo en el extremo alto del rango. No deduzcas lo que no ves: si un gesto no se distingue, confianza baja.
+
+**Lateralidad.** Mano derecha e izquierda son las del trabajador; razona como en la sección 4. Si la mano más activa queda del lado lejano, dilo en `ciclo.evidencia` (`validar` también lo avisa).

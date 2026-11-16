@@ -1,6 +1,6 @@
 # Limitaciones
 
-Esta skill (OWAS, REBA y RULA) es una **demostración**. Sus resultados no están validados y no sirven como evaluación de riesgos.
+Esta skill (OWAS, REBA, RULA y OCRA) es una **demostración**. Sus resultados no están validados y no sirven como evaluación de riesgos.
 
 ## No validada
 
@@ -35,6 +35,15 @@ Esta skill (OWAS, REBA y RULA) es una **demostración**. Sus resultados no está
 - **De frente o de espaldas**, los ángulos vienen de la profundidad estimada por MediaPipe y son los menos fiables (en el vídeo del taller de la PoC, la flexión del tronco de espaldas sale probablemente sobreestimada).
 - **Lado**: REBA usa el peor de los dos lados; un brazo oculto se recorre entero (rango). RULA se evalúa en los dos lados y se resume con el peor.
 - Con varios vídeos, REBA y RULA se puntúan por vídeo; no se fusionan cámaras para la peor postura.
+
+## OCRA
+
+- **Tablas clásicas, sin verificar frente a ISO 11228-3:2026** (publicada el 08/05/2026, sustituye a la de 2007). Algunos escalones (PoM por articulación, ReM, AdM, DuM) tienen versiones distintas en la bibliografía; están marcados `verificar_iso_2026` y como puntos abiertos.
+- **El recuento de acciones técnicas lo hace un modelo de IA mirando láminas** (4–8 fotogramas por segundo). El código impone las reglas, pero no puede saber si un gesto que la IA no vio existió. La mano de apoyo y la del lado lejano de la cámara son las más difíciles: en MTR-juguetes la ficha de Claude da 3–6 AT para la izquierda frente a las 8 del caso de referencia. La ficha debe confirmarla el usuario.
+- **Lo que no se ve en el vídeo se declara**: minutos de cada tarea, horario de pausas, Borg, factores adicionales, lateralidad. Sin ellos el índice es un rango (a veces muy amplio: sin horario, RcM va de 0 a 1 y el máximo es infinito).
+- **Posturas con MediaPipe**: hombro y codo razonables si se ven; la muñeca se estima con tres puntos y es poco fiable; la pronosupinación, la desviación y el tipo de agarre no se miden. Con poca cobertura, la articulación queda desconocida.
+- **El ciclo por periodicidad** es una propuesta: con ciclos irregulares o pocas repeticiones sale «poco fiable» y hay que marcarlo a mano.
+- **El escenario proyectado** solo recalcula lo que el usuario o Claude dicen que cambia una medida; no comprueba que la medida lo consiga.
 
 ## Varias cámaras
 

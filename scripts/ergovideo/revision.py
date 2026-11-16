@@ -135,6 +135,18 @@ def plantilla(video: str, duracion: float) -> dict:
     }
 
 
+def plantilla_ocra(inicio: float | None = None, fin: float | None = None, candidatos: dict | None = None) -> dict:
+    """Bloque «ocra» de revision.json: ficha de acciones técnicas del ciclo representativo (ver REVISION_VISUAL.md)."""
+    return {
+        "ciclo": {"inicio": inicio, "fin": fin, "evidencia": ""},
+        "manos_visibles": None,
+        "acciones": [],
+        "posturas": {"dch": {"agarre": None}, "izq": {"agarre": None}},
+        "candidatos_mediapipe": candidatos or {},
+        "confirmada": False,
+    }
+
+
 # ------------------------------------------------------------------ carga y validación
 
 class RevisionInvalida(ValueError):
@@ -198,6 +210,20 @@ def cargar(ruta: str | Path, duracion: float | None = None) -> dict:
             errores.append(f"revisiones[{i}].veredicto debe ser {', '.join(VEREDICTOS)}")
         if not str(v.get("evidencia", "")).strip():
             errores.append(f"revisiones[{i}].evidencia es obligatoria")
+    oc = r.get("ocra")
+    if oc and oc.get("acciones"):
+        from .ocra_at import FichaInvalida, validar as validar_ficha
+        try:
+            r["_ocra_ficha"] = validar_ficha(oc, duracion)
+        except FichaInvalida as e:
+            errores.append(str(e))
+    if oc:
+        if oc.get("manos_visibles") not in (None, True, False):
+            errores.append("ocra.manos_visibles debe ser true, false o null")
+        for m in ("dch", "izq"):
+            ag = ((oc.get("posturas") or {}).get(m) or {}).get("agarre")
+            if ag is not None and not isinstance(ag, (int, float, list, dict)):
+                errores.append(f"ocra.posturas.{m}.agarre: fracción del ciclo (0–1), [mín, máx], objeto con «valor» o null")
     if errores:
         raise RevisionInvalida("revision.json no válido:\n- " + "\n- ".join(errores))
     return r

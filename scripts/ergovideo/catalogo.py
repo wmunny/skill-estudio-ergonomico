@@ -132,6 +132,54 @@ CATALOGO = {
             ("ingenieria", "Dotar a las piezas o cajas de asas o puntos de agarre adecuados."),
             ("ingenieria", "Usar guantes de la talla correcta que no reduzcan la sensibilidad."),
         ]),
+    # ---- OCRA (movimientos repetitivos de la extremidad superior)
+    "ocra_frecuencia": dict(
+        region="muneca", titulo="Demasiadas acciones técnicas por minuto",
+        riesgo="Una frecuencia alta de gestos con la mano y el brazo, mantenida durante el turno, se asocia a tendinitis, "
+               "síndrome del túnel carpiano y epicondilitis.",
+        medidas=[
+            ("ingenieria", "Eliminar gestos del ciclo: piezas presentadas en la posición de montaje (alimentación por gravedad, bandejas orientadas)."),
+            ("ingenieria", "Útiles de sujeción y posicionado que sustituyan a la mano de apoyo y eviten gestos de colocar y ajustar."),
+            ("organizativa", "Reducir el ritmo o ampliar el tiempo de ciclo; repartir gestos entre las dos manos o entre puestos."),
+            ("organizativa", "Rotar con tareas no repetitivas o que usen otros grupos musculares."),
+        ]),
+    "ocra_recuperacion": dict(
+        region="global", titulo="Pausas insuficientes para recuperarse",
+        riesgo="Sin periodos de recuperación adecuados (unos 10 minutos por hora de trabajo repetitivo) la fatiga se acumula "
+               "y aumenta el riesgo de trastornos de la extremidad superior.",
+        medidas=[
+            ("organizativa", "Distribuir pausas de unos 10 minutos de forma que ninguna hora de trabajo repetitivo quede sin recuperación (proporción 50:10)."),
+            ("organizativa", "Intercalar tareas no repetitivas (control visual, preparación, limpieza) como periodos de recuperación."),
+        ]),
+    "ocra_fuerza": dict(
+        region="muneca", titulo="Esfuerzo con la mano en el ciclo",
+        riesgo="Hacer fuerza con la mano en cada ciclo (encajar, apretar, presionar) multiplica el efecto de la repetición.",
+        medidas=[
+            ("ingenieria", "Rediseñar los encajes o usar herramientas (prensas, útiles de palanca, atornilladores con reacción absorbida) para reducir la fuerza."),
+            ("ingenieria", "Mantener herramientas y piezas en buen estado y con tolerancias que no exijan forzar."),
+        ]),
+    "ocra_postura": dict(
+        region="hombro", titulo="Posturas forzadas de la extremidad superior en el ciclo",
+        riesgo="Hombro elevado o separado, codo muy flexionado, muñeca doblada o agarre en pinza durante buena parte del "
+               "ciclo reducen la frecuencia de gestos que el puesto admite.",
+        medidas=[
+            ("ingenieria", "Acercar y bajar piezas y herramientas al área de trabajo cómoda (entre cintura y pecho, delante del cuerpo)."),
+            ("ingenieria", "Elegir herramientas y agarres que mantengan la muñeca recta y permitan agarrar con toda la mano."),
+        ]),
+    "ocra_estereotipia": dict(
+        region="global", titulo="Gestos idénticos repetidos (estereotipia)",
+        riesgo="Repetir los mismos gestos en ciclos muy cortos concentra la carga en las mismas estructuras.",
+        medidas=[
+            ("organizativa", "Enriquecer o ampliar la tarea para alargar el ciclo y variar los gestos."),
+            ("organizativa", "Rotación entre puestos con exigencias distintas para la mano y el brazo."),
+        ]),
+    "ocra_adicionales": dict(
+        region="muneca", titulo="Factores adicionales en el ciclo",
+        riesgo="Guantes inadecuados, vibraciones, golpes, frío o precisión extrema aumentan la exigencia de cada gesto.",
+        medidas=[
+            ("ingenieria", "Eliminar o reducir el factor en su origen (herramientas sin vibración, encajes sin golpe, temperatura)."),
+            ("ingenieria", "Guantes de la talla y el material adecuados a la tarea."),
+        ]),
 }
 
 REGIONES = {

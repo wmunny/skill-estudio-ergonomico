@@ -1,6 +1,6 @@
-# Revisión de OWAS, REBA y RULA
+# Revisión de OWAS, REBA, RULA y OCRA
 
-Skill *estudio-ergonomico-video* · documento generado el 06/11/2026 a partir del código (`scripts/informe_revision.py`). Versión 2: incorpora la auditoría documental del 06/11/2026 y las decisiones del usuario sobre fronteras, carga, datos desconocidos y margen de medida.
+Skill *estudio-ergonomico-video* · documento generado el 16/11/2026 a partir del código (`scripts/informe_revision.py`). Versión 2: incorpora la auditoría documental del 06/11/2026 y las decisiones del usuario sobre fronteras, carga, datos desconocidos y margen de medida.
 
 > **Demostración no validada.** Este documento describe lo que hace el programa para que un experto compruebe que las tablas y las reglas son correctas. No es una evaluación de riesgos.
 
@@ -422,6 +422,172 @@ Tablas: Ergonautas (UPV), [método RULA](https://www.ergonautas.upv.es/metodos/r
 | Brazo izq. a 100° abducido (80° fuera del plano sagital), codo 0°, muñeca a 3,7 semianchos; resto como el primero | 1 | 7 | 4 | 6 | 1 | 4 |
 | Como el primero, pero sin declarar nada (todo desconocido) | 1–4 | 1–8 | 1–11 | 2–7 | 1–7 | 2–7 |
 
+## OCRA (movimientos repetitivos, ISO 11228-3)
+
+> **Aviso normativo.** Tablas clásicas de OCRA (ISO 11228-3:2007, anexo C, y Colombini y Occhipinti). ISO 11228-3:2026 (publicada el 08/05/2026) sustituye a la edición de 2007: no se ha verificado la conformidad con ella. Todas las constantes están en `scripts/ergovideo/tablas_ocra.py` con su fuente y la marca `verificar_iso_2026`. La herramienta no afirma conformidad con la edición de 2026.
+
+Por mano: ATA = Σ frecuencia_j × minutos_j; RTA = Σ (30 × FoM_j × PoM_j × ReM_j × AdM_j × minutos_j) × RcM × DuM; índice = ATA / RTA. Admite varias tareas repetitivas en el turno. Cada dato puede ser puntual, un rango o desconocido (se recorre entero); el índice se da como rango [ATA mín / RTA máx, ATA máx / RTA mín].
+
+### Multiplicador de fuerza (FoM, Borg CR-10)
+
+| Borg | FoM |
+|---|---|
+| 0,5 | 1 |
+| 1 | 0,85 |
+| 1,5 | 0,75 |
+| 2 | 0,65 |
+| 2,5 | 0,55 |
+| 3 | 0,45 |
+| 3,5 | 0,35 |
+| 4 | 0,2 |
+| 4,5 | 0,1 |
+| 5 | 0,01 |
+
+*Borg ≤ 0,5 → 1; ≥ 5 → 0,01. Sin interpolar: entre escalones se usa el superior (FoM más bajo) y el inferior va a la sensibilidad. Borg medio ponderado por la duración de cada fase.*
+
+### Multiplicador de postura (PoM)
+
+| Fracción del ciclo en postura forzada ≥ | PoM |
+|---|---|
+| 0 % | 1 |
+| 33 % | 0,7 |
+| 67 % | 0,6 |
+| 90 % | 0,5 |
+
+*Por hombro, codo, muñeca y agarre; se toma el más bajo. La estereotipia no entra aquí (va en ReM).*
+
+| Articulación | Postura forzada medida con MediaPipe |
+|---|---|
+| Hombro | flexión ≥ 80° o abducción ≥ 45° |
+| Codo | flexión ≥ 100° (aproximación propia; la pronosupinación no se mide) |
+| Muñeca | flexión o extensión ≥ 45° (estimada con tres puntos de la mano; poco fiable) |
+| Agarre | no se mide: revisión visual o declarado |
+
+*Fracción con el margen de medida: mínima (forzada aun restando el margen) y máxima (sumándolo); lo no medido cuenta 0 en el mínimo y 1 en el máximo. Con menos del 50 % medido, la articulación queda desconocida.*
+
+### Repetitividad (ReM), factores adicionales (AdM), recuperación (RcM) y duración (DuM)
+
+**ReM** = 0,7 si el ciclo dura menos de 15 s o la misma acción ocupa más del 50 % del ciclo; si no, 1.
+
+| Fracción del ciclo con el factor ≥ | AdM |
+|---|---|
+| 0 % | 1 |
+| 25 % | 0,95 |
+| 51 % | 0,9 |
+| 80 % | 0,8 |
+
+*Factores: Guantes inadecuados que dificultan el agarre; Herramientas que vibran; Exigencia de precisión extrema; Golpes con la mano o con herramientas (martilleo, encajes a golpe); Exposición a frío o a superficies frías; Compresión localizada de la mano o el antebrazo; Contragolpes o tirones de la herramienta; Ritmo impuesto por la máquina. Con varios, el más bajo.*
+
+| Horas sin recuperación adecuada | RcM |
+|---|---|
+| 0 | 1 |
+| 1 | 0,9 |
+| 2 | 0,8 |
+| 3 | 0,7 |
+| 4 | 0,6 |
+| 5 | 0,45 |
+| 6 | 0,25 |
+| 7 | 0,1 |
+| 8 | 0 |
+
+*Desde el horario: proporción trabajo/recuperación 5:1 (una pausa de R min cubre hasta 5·R min de la hora anterior); la comida y el final del turno cubren la hora previa; una pausa de menos de 8 min no cuenta. Horas no enteras → rango entre los dos escalones (nominal: el más cercano).*
+
+| Minutos netos repetitivos | DuM |
+|---|---|
+| < 120 | 2 |
+| 120–239 | 1,5 |
+| 240–480 | 1 |
+| > 480 | 0,5 |
+
+### Clasificación
+
+| Índice (redondeado a una décima) ≤ | Color | Nivel | Actuación |
+|---|---|---|---|
+| 2,2 | verde | Aceptable | Sin riesgo o riesgo muy bajo: no requiere actuación. |
+| 3,5 | amarillo | Riesgo incierto o muy bajo | Se recomienda mejorar el puesto, vigilar y formar. |
+| ∞ | rojo | No aceptable | Riesgo presente: rediseñar el puesto o la tarea. |
+
+*ISO 11228-3:2007 (3 bandas) (`iso2007`).*
+
+| Índice (redondeado a una décima) ≤ | Color | Nivel | Actuación |
+|---|---|---|---|
+| 2,2 | verde | Aceptable | No requiere actuación. |
+| 3,5 | amarillo | Muy bajo o incierto | Mejorar el puesto, vigilar y formar. |
+| 4,5 | rojo_bajo | Riesgo bajo | Rediseñar el puesto y la tarea; vigilancia de la salud. |
+| 9 | rojo | Riesgo medio | Rediseñar el puesto y la tarea con prioridad; vigilancia de la salud. |
+| ∞ | morado | Riesgo alto | Actuar de inmediato: rediseño urgente; vigilancia de la salud. |
+
+*Colombini y Occhipinti (5 bandas) (`colombini5`).*
+
+### Comprobaciones de frontera (funciones reales)
+
+| Comprobación | a − ε | a | a + ε |
+|---|---|---|---|
+| FoM, Borg a = 1 | 0,85 | 0,85 | 0,75 |
+| PoM, fracción a = 1/3 | 1 | 0,7 | 0,7 |
+| ReM, ciclo a = 15 s | 0,7 | 1 | 1 |
+| AdM, fracción a = 51 % | 0,95 | 0,9 | 0,9 |
+| DuM, a = 120 min | 2 | 1,5 | 1,5 |
+| DuM, a = 480 min | 1 | 1 | 0,5 |
+| ISO 2007, índice a = 3,5 | amarillo | amarillo | rojo (3,55) |
+
+### Recuento de acciones técnicas (ficha de la revisión visual)
+
+| Gesto | AT | Regla aplicada en código |
+|---|---|---|
+| alcanzar | 0 | Alcanzar no es AT por sí solo: se valora en la postura y forma parte de «coger». |
+| coger | 1 | Coger o agarrar: 1 AT. |
+| agarrar | 1 | Coger o agarrar: 1 AT. |
+| pasar mano | 1 | Pasar de una mano a otra: 1 AT por mano (anota una entrada en cada mano). |
+| posicionar | 1 | Posicionar en un punto definido: 1 AT. |
+| introducir | 1 | Introducir con esfuerzo o precisión: 1 AT (aparte de posicionar solo si es un gesto distinto). |
+| encajar | 1 | Encajar con esfuerzo o precisión: 1 AT (aparte de posicionar solo si es un gesto distinto). |
+| sacar | 1 | Sacar con esfuerzo o precisión: 1 AT. |
+| empujar | 1 | Empujar: 1 AT. |
+| tirar | 1 | Tirar: 1 AT. |
+| presionar | 1 | Presionar: 1 AT. |
+| girar | 1 × repeticiones | Girar: 1 AT por giro. |
+| coger herramienta | 1 | Herramienta: coger 1 AT. |
+| posicionar herramienta | 1 | Herramienta: posicionar 1 AT. |
+| accionar herramienta | 1 × repeticiones | Herramienta: 1 AT por accionamiento. |
+| devolver herramienta | 0 | Devolver una herramienta suspendida soltándola es soltar: no es AT. |
+| dejar herramienta soporte | 1 | Dejar la herramienta en un soporte con precisión es posicionar: 1 AT. |
+| soltar | 0 | Soltar o abrir la mano no es AT. |
+| abrir mano | 0 | Soltar o abrir la mano no es AT. |
+| transportar | 1 | Transportar: no es AT a menos de 1 m; 1 AT a 1 m o más. |
+| sujetar | 0 | Sujetar estático (mano de apoyo) no es AT: se valora en la postura y el agarre. |
+| control visual | 0 | El control visual no es AT. |
+| andar | 0 | Andar no es AT. |
+| esperar | 0 | Esperar no es AT. |
+| golpear | 1 × repeticiones | Golpes: 1 AT cada uno. |
+| pasada | 1 × repeticiones | Pasadas repetidas: 1 AT cada una. |
+
+*Claude propone; el código cuenta. Se rechaza lo que la regla no admite; las entradas de confianza baja o sin el dato de la regla (distancia, esfuerzo) quedan dudosas y solo cuentan en el máximo del rango.*
+
+### Caso de regresión MTR-juguetes
+
+| Mano | AT/ciclo | Ciclo | FoM | PoM | ReM | AdM | RcM | DuM | Min | Índice |
+|---|---|---|---|---|---|---|---|---|---|---|
+| derecha | 11 | 10 s | 0,85 | 0,70 | 0,70 | 0,90 | 0,60 | 1 | 400 | 9,78 |
+| izquierda | 8 | 10 s | 0,95 | 0,80 | 0,70 | 0,90 | 0,60 | 1 | 400 | 5,57 |
+
+*Esperado: 9,78 y 5,57 (tests/test_ocra.py). Con la ficha de 17/14 AT de otro análisis, el código rechaza «devolver herramienta», «soltar», «alcanzar» y las sujeciones de la mano de apoyo, y deja 11/8.*
+
+### Fuentes de cada constante
+
+| Constante | Fuente | verificar_iso_2026 |
+|---|---|---|
+| frecuencia_referencia | ISO 11228-3:2007 C; Occhipinti (1998): CF = 30 acciones/min | sí |
+| fom_borg | ISO 11228-3:2007 C (tabla del multiplicador de fuerza por Borg CR-10); Colombini et al. (2002) | sí |
+| pom_fraccion | ISO 11228-3:2007 C.2: PoM = 1 si la postura forzada ocupa < 1/3 del ciclo; se toma el multiplicador más bajo. Escalones superiores pendientes de contraste celda a celda | sí |
+| posturas_forzadas | Criterios de ISO 11228-3:2007 / UNE-EN 1005-5 para hombro y muñeca; el del codo es una aproximación propia (la pronosupinación no se mide con MediaPipe) | sí |
+| rem | Criterio de estereotipia indicado en el encargo (ciclo < 15 s o la misma acción > 50 % del ciclo → 0,70). Otras versiones lo gradúan (0,85 / 0,70): ver docs/REVISION_METODOS.md | sí |
+| adm | Colombini et al. (2002) / ISO 11228-3:2007 C: factores adicionales por fracción del ciclo | sí |
+| rcm_horas | ISO 11228-3:2007 C; Colombini et al. (2002): horas sin recuperación adecuada → RcM | sí |
+| recuperacion | Colombini et al. (2002): proporción trabajo/recuperación 5:1 (50 min / 10 min); la hora previa a la comida y al final del turno cuentan como recuperadas | sí |
+| dum | ISO 11228-3:2007 C (versión de 4 tramos del encargo; existen versiones con más tramos) | sí |
+| clasificacion | ISO 11228-3:2007 C (3 bandas) y Colombini y Occhipinti (5 bandas) | sí |
+
 ## Estado del resultado y validez técnica
 
 Los colores miden cobertura y certeza del cálculo con convenciones provisionales, no la exactitud de la medida ni el nivel de riesgo.
@@ -436,6 +602,9 @@ Los colores miden cobertura y certeza del cálculo con convenciones provisionale
 | OWAS | Observaciones con código nominal conocido | ≥ 80 % | ≥ 50 % | menos |
 | OWAS | Intervalo aproximado del % de tiempo | ≤ ±10 | ≤ ±20 | más |
 | OWAS | Duración | ≥ 20 min | < 20 min | — |
+| OCRA | Ciclos completos en el vídeo | ≥ 3 | 2–3 o ciclo sin determinar | < 2 |
+| OCRA | Fotogramas por segundo | ≥ 25 | 15–25 | < 15 |
+| OCRA | Mano más activa | visible ≥ 70 % y del lado de la cámara | lado lejano o menos visible | manos no visibles (revisión) |
 
 **Peor postura (REBA, RULA):** sostenida (máximo de la puntuación mínima en ventanas de 0,5 s) y pico breve fiable (máximo en fotogramas sin valores interpolados, con su duración). Si el pico breve supera a la sostenida, se avisa para revisarlo en el vídeo.
 
@@ -499,6 +668,22 @@ Los colores miden cobertura y certeza del cálculo con convenciones provisionale
 | P19 | Fronteras de RULA (notas de 2024) | Pendiente de verificar el documento | En la frontera, la mayor |
 | P20 | Márgenes de medida | Provisional | Sección 2.1; calibrar con vídeos anotados |
 
+**OCRA.**
+
+| Ref. | Decisión | Estado | Valor actual |
+|---|---|---|---|
+| O1 | Conformidad con ISO 11228-3:2026 | Pendiente | Tablas clásicas (2007 y Colombini); sin verificar frente a 2026 |
+| O2 | PoM: escalones por fracción y articulación (tabla C.2) | Pendiente del experto | Confirmado PoM = 1 por debajo de 1/3; escalones 0,70 / 0,60 / 0,50 en 1/3, 2/3 y 90 %, iguales para todas |
+| O3 | ReM: estereotipia | Pendiente del experto | Criterio del encargo (ciclo < 15 s o > 50 % → 0,70); otras versiones gradúan 0,85 / 0,70 |
+| O4 | AdM: bandas por fracción del ciclo | Pendiente del experto | 25 % → 0,95; 51 % → 0,90; 80 % → 0,80 |
+| O5 | DuM | Pendiente del experto | 4 tramos (< 120, 120–239, 240–480, > 480 min); hay versiones con más tramos |
+| O6 | RcM desde el horario | Provisional | Proporción 5:1; pausa mínima 8 min; comida y fin del turno cubren la hora previa |
+| O7 | FoM entre escalones | Resuelto (convención) | Escalón conservador; el otro, en la sensibilidad; interpolar es configurable |
+| O8 | Posturas forzadas medidas con MediaPipe | Pendiente de validación | Hombro 80°/45°, codo 100° (propio), muñeca 45°; pronosupinación y desviación no se miden |
+| O9 | Bandas de clasificación | Resuelto (convención) | Sobre el índice redondeado a una décima |
+| O10 | Reglas de recuento de AT | Pendiente de validación | Validar con fichas de expertos sobre los mismos vídeos |
+| O11 | Ciclo por periodicidad y candidatos a AT | Heurística propia | Autocorrelación ≥ 0,3; paradas y cambios de velocidad de la muñeca |
+
 **Validación propuesta:** vídeos reales independientes (personas y vídeos distintos para calibrar y para probar), con oclusiones y distintas cámaras, anotados por un ergónomo. Informar error angular, matriz de confusión por código OWAS, acuerdo por nivel de actuación y, sobre todo, las subestimaciones. Kappa sin ponderar para los códigos OWAS de piernas (nominales); para REBA y RULA, además del ICC, acuerdo ordinal por nivel.
 
 ## Fuentes
@@ -509,3 +694,4 @@ Los colores miden cobertura y certeza del cálculo con convenciones provisionale
 - McAtamney (2024), notas para usar RULA, citadas por la auditoría (selección de lado y fronteras): pendiente de verificar.
 - Aghazadeh y Xiong: preprint SSRN 6035502; la auditoría cita una versión publicada (DOI 10.1016/j.ergon.2026.104061), pendiente de verificar.
 - Auditoría documental de OWAS, REBA y RULA, 06/11/2026.
+- Occhipinti (1998), OCRA, Ergonomics 41(9):1290-1311. Colombini, Occhipinti y Grieco (2002), *Risk assessment and management of repetitive movements and exertions of upper limbs*. ISO 11228-3:2007, anexo C (sustituida por ISO 11228-3:2026, publicada el 08/05/2026: no verificada). UNE-EN 1005-5:2007. INSST: movimientos repetitivos.

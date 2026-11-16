@@ -202,7 +202,9 @@ def render(datos: dict, base: Path, adaptacion: dict | None, tecnico_html: str) 
         principales = ", ".join(h["titulo"].lower() for h in hall[:3]) or "no se han detectado posturas de riesgo relevantes"
         concl = (f"<p>Se han identificado {len(hall)} problemas ergonómicos, {n_alta} de gravedad alta. Los principales: "
                  f"{_e(principales)}.</p>")
-    inds = "".join(
+    from . import informe_ocra
+    sintesis = informe_ocra.semaforos(datos["indicadores"]) if len(datos["metodos"]) > 1 and datos["indicadores"] else ""
+    inds = "" if sintesis else "".join(
         f'<div class="ind" style="--c:{COLOR_URG[i["urgencia"]]}"><div class="m">{_e(i["metodo"])} · {_e(i["que"])}</div>'
         f'<div class="n">{_e(i["nivel"])}</div><div class="a">{_e(i["accion"])}</div>'
         f'<div class="a" style="color:var(--suave)">{_e(i.get("detalle", ""))}</div></div>' for i in datos["indicadores"])
@@ -235,7 +237,7 @@ def render(datos: dict, base: Path, adaptacion: dict | None, tecnico_html: str) 
             else:
                 datos_h.append(f"<span>Fases: <b>{_e('; '.join(unicas[:3]).lower())}</b></span>")
         img = _img(base, h.get("captura"))
-        visual = (f'<img src="{img}" alt="{_e(h["titulo"])} a los {_num(h["t_ejemplo"], 1)} s">' if img else
+        visual = (f'<img src="{img}" alt="{_e(h["titulo"])}{" a los " + _num(h["t_ejemplo"], 1) + " s" if h.get("t_ejemplo") is not None else ""}">' if img else
                   f'<div class="sinimg">{_e(h.get("detalle") or "Condición de la tarea")}</div>')
         desc = (f'<div class="adapt"><div class="etq">Lo que se ve en este puesto (Claude)</div>{_e(a["descripcion"])}</div>'
                 if a.get("descripcion") else "")
@@ -267,23 +269,36 @@ def render(datos: dict, base: Path, adaptacion: dict | None, tecnico_html: str) 
         f'<td>{_e(TIPOS_MEDIDA.get(tp, tp))}</td><td>{", ".join(str(numero[x]) for x in hs if x in numero)}</td>'
         f'<td style="color:var(--suave)">{_e(o)}</td></tr>' for pr, t, tp, hs, o in filas)
 
+    oc = datos.get("ocra")
+    ocra_html = ""
+    if oc:
+        ocra_html = ("<h2>Movimientos repetitivos de la extremidad superior (OCRA)</h2>"
+                     + informe_ocra.bloque(oc, base, datos.get("_escenario_ocra")))
     tiempos = "".join(f'<h3 style="margin-top:1rem">{_e(v)}</h3>' * (len(datos["series"]) > 1) +
                       linea_tiempo(s, datos.get("fases", {}).get(v, []), [h for h in hall if h.get("video") == v])
                       for v, s in datos["series"].items())
     leyenda = "".join(f'<span><i style="background:{COLOR_URG[k]}"></i>{_e(URGENCIAS[k])}</span>' for k in range(5))
     metodos_txt = ", ".join(datos["metodos"]).upper()
+    if datos["series"]:
+        riesgo_t = (f'<h3 style="margin-top:1.2rem">Riesgo a lo largo de la tarea</h3>{tiempos}'
+                    f'<div class="leyenda">{leyenda}<span><i style="background:var(--g-no)"></i>Sin dato</span></div>'
+                    '<p style="font-size:.85rem;color:var(--suave)">Cada franja es el nivel de actuación de REBA (cuerpo entero) '
+                    'y RULA (peor brazo) en cada instante. Los números marcan dónde se ve cada problema.</p>')
+    else:
+        riesgo_t = ""
+    medida_txt = (f"Posturas medidas con visión artificial (MediaPipe Pose) sobre {_e(datos.get('video_txt', 'vídeo'))}."
+                  if datos.get("mediapipe", True) else
+                  f"Análisis observacional sobre {_e(datos.get('video_txt') or 'datos declarados')} (sin captura de movimiento).")
     principal = f"""
 <section class="panel" id="ergonomico">
   <div class="conclusion" style="--urg:{COLOR_URG[urg]}"><div class="urg">{_e(URGENCIAS[urg])}</div>{concl}</div>
-  <div class="inds">{inds}</div>
+  {sintesis}<div class="inds">{inds}</div>
   <h2>Dónde está el riesgo</h2>
   <div class="resumen">{mapa_corporal(hall)}
     <div><p>Zonas del cuerpo afectadas, por la gravedad de su peor problema:</p><div class="lista-reg">{reg_txt or "—"}</div>
-    <h3 style="margin-top:1.2rem">Riesgo a lo largo de la tarea</h3>{tiempos}
-    <div class="leyenda">{leyenda}<span><i style="background:var(--g-no)"></i>Sin dato</span></div>
-    <p style="font-size:.85rem;color:var(--suave)">Cada franja es el nivel de actuación de REBA (cuerpo entero) y RULA (peor
-    brazo) en cada instante. Los números marcan dónde se ve cada problema.</p></div>
+    {riesgo_t}</div>
   </div>
+  {ocra_html}
   <h2>Problemas identificados</h2>
   {"".join(tarjetas) or "<p>No se han identificado posturas de riesgo relevantes.</p>"}
   <h2>Qué hacer</h2>
@@ -291,14 +306,14 @@ def render(datos: dict, base: Path, adaptacion: dict | None, tecnico_html: str) 
   <tbody>{plan_html}</tbody></table></div>
   <p style="font-size:.85rem;color:var(--suave)">Prioridad según la gravedad del problema y el nivel de actuación de los métodos.
   Primero las medidas de diseño del puesto, que eliminan o reducen el riesgo en su origen.</p>
-  <div class="pie">Métodos: {metodos_txt} (tablas originales, calculadas en código). Posturas medidas con visión artificial
-  (MediaPipe Pose) sobre {_e(datos.get("video_txt", "vídeo"))}. <b>Prueba de concepto no validada:</b> no sustituye a la
+  <div class="pie">Métodos: {metodos_txt} (tablas originales, calculadas en código). {medida_txt}
+  <b>Prueba de concepto no validada:</b> no sustituye a la
   evaluación de un técnico de prevención. El detalle de la medida y la validez del vídeo está en la pestaña «Detalle técnico».</div>
 </section>"""
     return f"""<title>Informe ergonómico del puesto</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
-<style>{CSS}</style>
+<style>{CSS}{informe_ocra.CSS}</style>
 <main class="pag">
   <p class="etq">Informe ergonómico del puesto</p>
   <h1>{_e(titulo)}</h1>
@@ -319,6 +334,11 @@ def escribir(salida: Path, adaptacion: Path | None = None) -> Path:
     ruta_ad = adaptacion or (salida / "adaptacion.json")
     if ruta_ad and Path(ruta_ad).exists():
         ad = json.loads(Path(ruta_ad).read_text(encoding="utf-8"))
+    if datos.get("ocra") and (ad or {}).get("escenario_ocra"):
+        from . import ocra
+        e = ad["escenario_ocra"]
+        datos["_escenario_ocra"] = dict(ocra.escenario(datos["ocra"]["datos"], e.get("cambios", {})),
+                                        titulo=e.get("titulo"), medidas=e.get("medidas", []))
     tecnico = md_a_html((salida / "informe_tecnico.md").read_text(encoding="utf-8"), salida)
     pagina = render(datos, salida, ad, tecnico)
     cabeza, cuerpo = pagina.split('<main class="pag">', 1)

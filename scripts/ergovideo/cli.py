@@ -1,4 +1,4 @@
-"""Línea de órdenes: inspeccionar vídeos y hacer el estudio OWAS, REBA y RULA."""
+"""Línea de órdenes: inspeccionar vídeos y hacer el estudio ergonómico (OWAS, REBA, RULA y OCRA)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,8 @@ import numpy as np
 
 from datetime import datetime
 
-from . import ergo, grabacion, hallazgos, informe, informe_puesto, medidas, muestreo, pose, revision, visual
+from . import (cli_ocra, ergo, grabacion, hallazgos, informe, informe_ocra, informe_puesto, medidas, muestreo, ocra, pose,
+               revision, visual)
 from .config import MEDIDAS, Config
 from .reglas import CONVENCIONES
 from .tablas import CONVENCION_CARGA_OWAS, codigo_carga
@@ -185,10 +186,24 @@ def revisar(args) -> int:
     salida = Path(args.salida)
     salida.mkdir(parents=True, exist_ok=True)
     cfg = Config()
+    metodos = cli_ocra.leer_metodos(args.metodos)
     out = []
     for v in args.video:
         v = Path(v)
         print(f"MediaPipe: {v.name}…", file=sys.stderr)
+        if not cli_ocra.posturales(metodos):
+            # Solo OCRA: MediaPipe es opcional; las láminas son del ciclo, a 4–8 fotogramas por segundo.
+            p = cli_ocra.estimar_opcional(v, args, salida / "cache")
+            plantilla = salida / f"revision_{visual._seguro(v.name)}.json"
+            dur = p.duracion if p is not None else pose.info_video(v)["duracion"]
+            if not plantilla.exists():
+                plantilla.write_text(json.dumps(revision.plantilla(str(v), dur), ensure_ascii=False, indent=2),
+                                     encoding="utf-8")
+            d = dict(video=str(v), duracion_s=round(dur, 1), revision_json=str(plantilla), mediapipe=p is not None,
+                     instrucciones=str(Path(__file__).resolve().parents[2] / "docs" / "REVISION_VISUAL.md"))
+            d.update(cli_ocra.revisar_ocra(v, p, salida, args, plantilla))
+            out.append(d)
+            continue
         p = pose.estimar(v, args.fps_analisis, args.modelo, cache_dir=salida / "cache")
         res = medidas.calcular(p, cfg)
         # Instantes: cada `intervalo` s y, además, las posturas críticas de REBA y RULA sin datos declarados.
@@ -205,9 +220,12 @@ def revisar(args) -> int:
         plantilla = salida / f"revision_{visual._seguro(v.name)}.json"
         if not plantilla.exists():
             plantilla.write_text(json.dumps(revision.plantilla(str(v), p.duracion), ensure_ascii=False, indent=2), encoding="utf-8")
-        out.append(dict(video=str(v), duracion_s=round(p.duracion, 1), instantes=inst,
-                        laminas=[str(x) for x in laminas], revision_json=str(plantilla),
-                        instrucciones=str(Path(__file__).resolve().parents[2] / "docs" / "REVISION_VISUAL.md")))
+        d = dict(video=str(v), duracion_s=round(p.duracion, 1), instantes=inst,
+                 laminas=[str(x) for x in laminas], revision_json=str(plantilla),
+                 instrucciones=str(Path(__file__).resolve().parents[2] / "docs" / "REVISION_VISUAL.md"))
+        if "ocra" in metodos:
+            d.update(cli_ocra.revisar_ocra(v, p, salida, args, plantilla))  # misma pasada de MediaPipe
+        out.append(d)
     print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
     return 0
 
@@ -226,10 +244,13 @@ def _cargar(args) -> dict | int:
         print("--desfases debe tener un valor por vídeo", file=sys.stderr)
         return 2
     modo = args.modo if len(videos) > 1 else "combinar"
-    metodos = [m.strip().lower() for m in args.metodos.split(",")]
+    metodos = cli_ocra.leer_metodos(args.metodos)
     poses = []
     for v in videos:
         print(f"MediaPipe: {v.name}…", file=sys.stderr)
+        if not cli_ocra.posturales(metodos):
+            poses.append(cli_ocra.estimar_opcional(v, args, salida / "cache"))  # solo OCRA: MediaPipe opcional
+            continue
         p = pose.estimar(v, args.fps_analisis, args.modelo, cache_dir=salida / "cache")
         if p.detectado.mean() == 0:
             print(f"No se detecta ninguna persona en {v.name}.", file=sys.stderr)
@@ -242,7 +263,8 @@ def _cargar(args) -> dict | int:
             return 2
         rutas = args.revision * len(videos) if len(args.revision) == 1 else args.revision
         try:
-            revs = [revision.cargar(r, p.duracion) for r, p in zip(rutas, poses)]
+            revs = [revision.cargar(r, p.duracion if p is not None else pose.info_video(v)["duracion"])
+                    for r, p, v in zip(rutas, poses, videos)]
         except revision.RevisionInvalida as e:
             print(str(e), file=sys.stderr)
             return 2
@@ -258,6 +280,16 @@ def validar(args) -> int:
     c = _cargar(args)
     if isinstance(c, int):
         return c
+    if not cli_ocra.posturales(c["metodos"]):
+        out = dict(videos=[dict(video=v.name, duracion_s=round(i["duracion"], 1), fps=round(i["fps"], 1),
+                                resolucion=f"{i['ancho']}x{i['alto']}")
+                           for v in c["videos"] for i in [pose.info_video(v)]], metodos={})
+        oc = cli_ocra.validar_ocra(args, c["videos"], c["poses"], c["revs"])
+        out["metodos"]["OCRA"] = oc["por_video"]
+        out["como_mejorar"] = [x for d in oc["por_video"].values() for x in d["como_mejorar"]]
+        out["datos_ocra_que_faltan"] = oc["datos_que_faltan"]
+        print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
+        return 0
     ev = evaluar(c["poses"], c["nombres"], c["desfases"], args, c["metodos"], c["modo"], c["revs"])
     cfg = ev["cfg"]
     diags = [grabacion.diagnostico(p, f["res"], cfg.filtros.visibilidad) for p, f in zip(c["poses"], ev["fuentes"])]
@@ -276,6 +308,11 @@ def validar(args) -> int:
                 out["metodos"].setdefault(f"RULA {'izq.' if s_ == 'I' else 'dch.'}", {})[n] = dict(
                     apto=APTO[d["rula_val"][s_]["nivel"]], motivos=d["rula_val"][s_]["motivos"])
     out["como_mejorar"] = [x for d in diags for x in d["consejos"]]
+    if "ocra" in c["metodos"]:
+        oc = cli_ocra.validar_ocra(args, c["videos"], c["poses"], c["revs"], [f["res"] for f in ev["fuentes"]])
+        out["metodos"]["OCRA"] = oc["por_video"]
+        out["como_mejorar"] += [x for d in oc["por_video"].values() for x in d["como_mejorar"]]
+        out["datos_ocra_que_faltan"] = oc["datos_que_faltan"]
     out["datos_desconocidos"] = ev["tarea"].no_declarados()
     out["estimado_por_ia_sin_confirmar"] = [k for k, v in ev["origenes"].items() if v == "estimado por IA"]
     print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
@@ -295,6 +332,8 @@ def analizar(args) -> int:
         return c
     salida, videos, nombres, desfases = c["salida"], c["videos"], c["nombres"], c["desfases"]
     modo, metodos, poses, revs = c["modo"], c["metodos"], c["poses"], c["revs"]
+    if not cli_ocra.posturales(metodos):
+        return _analizar_solo_ocra(args, c)
 
     print("Evaluación…", file=sys.stderr)
     ev = evaluar(poses, nombres, desfases, args, metodos, modo, revs)
@@ -399,6 +438,15 @@ def analizar(args) -> int:
                args=dict(carga_texto=carga_texto, turno_h=args.turno_h, modo_texto=modo_texto, modo=modo,
                          postura_base=args.postura_base, angulos=args.angulos))
     md = informe.markdown(ctx)
+    oc, ocra_error = None, None
+    if "ocra" in metodos:
+        # Misma pasada de MediaPipe: se reutilizan las poses y las medidas ya calculadas.
+        try:
+            oc = cli_ocra.estudio(args, videos, poses, revs, [f["res"] for f in fuentes], salida)
+            md += "\n\n" + informe_ocra.markdown(oc)
+        except ocra.DatosOcraInvalidos as e:
+            ocra_error = f"OCRA no calculado: {e}. Faltan datos de organización (--datos-ocra) o la ficha de AT."
+            print(ocra_error, file=sys.stderr)
     (salida / "informe_tecnico.md").write_text(md, encoding="utf-8")
     for viejo in ("informe.md",):
         (salida / viejo).unlink(missing_ok=True)
@@ -417,16 +465,26 @@ def analizar(args) -> int:
     for h in hallazgos.ordenar(hall):
         unicos.setdefault(h["id"], h)
     hall = hallazgos.ordenar(list(unicos.values()) + hallazgos.condiciones(tarea)
-                             + (hallazgos.owas_frecuencia(resumen) if "owas" in metodos else []))
-    inds = hallazgos.indicadores(ergos, resumen, metodos)
+                             + (hallazgos.owas_frecuencia(resumen) if "owas" in metodos else [])
+                             + (informe_ocra.hallazgos(oc["resultado"]) if oc else []))
+    if oc:
+        informe_ocra.adjuntar_capturas(hall, oc)
+        # OCRA cuantifica la repetitividad: el hallazgo genérico se integra en el de frecuencia de OCRA.
+        frec = next((h for h in hall if h["id"] == "ocra_frecuencia"), None)
+        rep = next((h for h in hall if h["id"] == "repetitividad"), None)
+        if frec and rep:
+            frec["evidencia"] = frec["evidencia"] + rep["evidencia"]
+            hall = [h for h in hall if h is not rep]
+    inds = hallazgos.indicadores(ergos, resumen, metodos) + ([informe_ocra.indicador(oc["resultado"])] if oc else [])
     urg = max([i["urgencia"] for i in inds] + [0])
     rev0 = next((r for r in revs if r), None)
     datos_inf = dict(
         tarea=(rev0 or {}).get("contexto", {}).get("tarea") or None, fecha=datetime.now().strftime("%d/%m/%Y"),
-        video_txt=", ".join(f"{n} ({p.duracion:.0f} s)" for n, p in zip(nombres, poses)), metodos=metodos,
+        video_txt=", ".join(f"{n} ({p.duracion:.0f} s)" for n, p in zip(nombres, poses)),
+        metodos=[m for m in metodos if m != "ocra" or oc],
         indicadores=inds, urgencia_global=urg, hallazgos=hall, plan=hallazgos.plan(hall, urg),
         series={n: hallazgos.serie_riesgo(d["serie"]) for n, d in ergos.items()},
-        fases={n: (r or {}).get("fases", []) for n, r in zip(nombres, revs)})
+        fases={n: (r or {}).get("fases", []) for n, r in zip(nombres, revs)}, ocra=oc)
     (salida / "informe_datos.json").write_text(json.dumps(datos_inf, ensure_ascii=False, indent=2, default=_json), encoding="utf-8")
     informe_puesto.escribir(salida)
 
@@ -469,13 +527,30 @@ def analizar(args) -> int:
         adaptacion=str(salida / "adaptacion.json"),
         no_declarados=tarea.no_declarados(),
         estimado_por_ia=[k for k, v in ev["origenes"].items() if v == "estimado por IA"],
-        comparativa={k: dict(sin_revision=a[0], con_revision=b[0]) for k, a, b in comparativa} if comparativa else None)
+        comparativa={k: dict(sin_revision=a[0], con_revision=b[0]) for k, a, b in comparativa} if comparativa else None,
+        ocra=cli_ocra.corto(oc) if oc else ocra_error)
     print(json.dumps(corto, ensure_ascii=False, indent=2, default=_json))
     return 0
 
 
+def _analizar_solo_ocra(args, c) -> int:
+    """Camino «solo OCRA»: sin OWAS, REBA ni RULA; MediaPipe solo si el vídeo lo permite."""
+    salida, videos, poses, revs = c["salida"], c["videos"], c["poses"], c["revs"]
+    try:
+        oc = cli_ocra.estudio(args, videos, poses, revs, None, salida)
+    except ocra.DatosOcraInvalidos as e:
+        print(f"OCRA no calculado: {e}", file=sys.stderr)
+        return 2
+    txt = ", ".join(f"{v.name} ({pose.info_video(v)['duracion']:.0f} s)" for v in videos)
+    ruta = cli_ocra.escribir_solo_ocra(salida, oc, revs, txt, any(p is not None for p in poses))
+    out = dict(informe=str(ruta), ocra=cli_ocra.corto(oc), adaptacion=str(salida / "adaptacion.json"),
+               hallazgos=[h["id"] for h in informe_ocra.hallazgos(oc["resultado"])])
+    print(json.dumps(out, ensure_ascii=False, indent=2, default=_json))
+    return 0
+
+
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="estudio_video", description="Estudio ergonómico (OWAS, REBA, RULA) a partir de vídeo con MediaPipe Pose (demostración no validada).")
+    ap = argparse.ArgumentParser(prog="estudio_video", description="Estudio ergonómico (OWAS, REBA, RULA y OCRA) a partir de vídeo (demostración no validada).")
     sub = ap.add_subparsers(dest="orden", required=True)
 
     a = sub.add_parser("inspeccionar", help="Datos básicos de los vídeos (sin MediaPipe)")
@@ -490,7 +565,19 @@ def main(argv=None) -> int:
     r.add_argument("--max-fotogramas", type=int, default=48, help="Máximo de fotogramas por vídeo")
     r.add_argument("--fps-analisis", type=float, default=10.0)
     r.add_argument("--modelo", choices=["full", "heavy"], default="full")
+    r.add_argument("--metodos", default="todos", help="todos (por defecto) u owas, reba, rula, ocra separados por comas")
+    r.add_argument("--ciclo-inicio", type=float, default=None, help="OCRA: segundo de inicio del ciclo representativo")
+    r.add_argument("--ciclo-fin", type=float, default=None, help="OCRA: segundo de fin del ciclo representativo")
+    r.add_argument("--fps-ocra", type=float, default=6.0, help="OCRA: fotogramas por segundo de las láminas del ciclo (4–8)")
+    r.add_argument("--sin-pose", action="store_true", help="Solo OCRA: no usar MediaPipe")
     r.set_defaults(func=revisar)
+
+    o = sub.add_parser("ocra", help="Índice OCRA con datos manuales o un JSON, sin vídeo")
+    o.add_argument("--datos-ocra", "--datos", dest="datos_ocra", required=True, help="JSON con tareas, turno, pausas, Borg…")
+    o.add_argument("--revision", default=None, help="revision.json con la ficha de AT (opcional)")
+    o.add_argument("--clasificacion-ocra", choices=["iso2007", "colombini5"], default=None)
+    o.add_argument("--salida", default=None, help="Carpeta para el informe (opcional)")
+    o.set_defaults(func=cli_ocra.orden_ocra)
 
     i = sub.add_parser("informe", help="Vuelve a generar informe.html (p. ej. con adaptacion.json)")
     i.add_argument("--salida", required=True)
@@ -504,7 +591,13 @@ def main(argv=None) -> int:
                    help="Flexión de rodillas si no se ven (p. ej. sentado con las piernas fuera del encuadre)")
     b.add_argument("--video", action="append", required=True, help="Vídeo (repetible)")
     b.add_argument("--salida", required=True)
-    b.add_argument("--metodos", default="owas,reba,rula", help="Métodos, separados por comas: owas, reba, rula")
+    b.add_argument("--metodos", default="todos",
+                   help="todos (estudio completo, por defecto) o uno o varios separados por comas: owas, reba, rula, ocra")
+    b.add_argument("--datos-ocra", default=None,
+                   help="OCRA: JSON con tareas y minutos, turno y pausas, Borg y factores adicionales")
+    b.add_argument("--clasificacion-ocra", choices=["iso2007", "colombini5"], default=None,
+                   help="OCRA: bandas de ISO 11228-3:2007 (3) o de Colombini (5)")
+    b.add_argument("--sin-pose", action="store_true", help="Solo OCRA: no usar MediaPipe")
     b.add_argument("--carga-kg", type=float, default=None, help="Carga o fuerza (kg) durante todo el vídeo; sin declarar = rango")
     b.add_argument("--tramos-carga", default=None, help="CSV video;inicio_s;fin_s;kg (carga por tramos en OWAS, REBA y RULA)")
     b.add_argument("--fuerza-brusca", choices=["si", "no"], default=None, help="Cargas o fuerzas aplicadas bruscamente")
